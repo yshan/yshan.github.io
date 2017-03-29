@@ -1,8 +1,8 @@
-<html>
+﻿<html>
 	<head>
 		<title>TSP</title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jcanvas.min.js"></script>
 		<script type="text/javascript" src="js/tsp.js"></script>
@@ -107,7 +107,7 @@
 					}
 					tick = (new Date()).getTime()-tick;
 					render(bestSol);
-					window.alert("������ɣ�����·�����ȣ�"+Math.floor(bestSol.cost)+",�����ѣ�"+tick+"ms");
+					window.alert("搜索完成，最优路径长度："+Math.floor(bestSol.cost)+",共花费："+tick+"ms");
 					triggerEvent(true);
 				};
 				
@@ -178,24 +178,24 @@
 	</head>
 	<body>
 		<div id="opera">
-		�㷨��
+		算法：
 		<select id="algorSel">
-			<option value="SA">ģ���˻�(SA)</option>
-			<option value="GA">�Ŵ��㷨(GA)</option>
-			<option value="ACO">��Ⱥ�Ż�(ACO)</option>
-			<option value="PSO">����Ⱥ(PSO)</option>
+			<option value="SA">模拟退火(SA)</option>
+			<option value="GA">遗传算法(GA)</option>
+			<option value="ACO">蚁群优化(ACO)</option>
+			<option value="PSO">粒子群(PSO)</option>
 		</select>
-		<input type="button" value="���" id="clearBtn"/>
-		<input type="button" value="��ʼ����" id="startBtn"/>
-		<input type="button" value="ֹͣ����" id="stopBtn"/>
-		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@��ɽ</a>
+		<input type="button" value="清除" id="clearBtn"/>
+		<input type="button" value="开始搜索" id="startBtn"/>
+		<input type="button" value="停止搜索" id="stopBtn"/>
+		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
 		</div>
 		<div id="desc" style="font:8pt;color:green;">
-		����˵��:���������ó���
+		操作说明:点击鼠标设置城市
 		</div>
 		<div id="tspexplain" style="font-size:12px;width:600px;background-color:lightyellow">
-		���������⣬��TSP���⣨Travelling Salesman Problem����
-		<br/>	������һ����������Ҫ�ݷ�n�����У�������ѡ����Ҫ�ߵ�·����·����������ÿ������ֻ�ܰݷ�һ�Σ��������Ҫ�ص�ԭ�������ĳ��С�·����ѡ��Ŀ����Ҫ��õ�·��·��Ϊ����·��֮�е���Сֵ��
+		旅行商问题，即TSP问题（Travelling Salesman Problem）。
+		<br/>	假设有一个旅行商人要拜访n个城市，他必须选择所要走的路径，路径的限制是每个城市只能拜访一次，而且最后要回到原来出发的城市。路径的选择目标是要求得的路径路程为所有路径之中的最小值。
 		</div>
 	</body>
 </html>

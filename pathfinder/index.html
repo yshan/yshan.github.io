@@ -1,8 +1,8 @@
-<html>
+﻿<html>
 	<head>
-		<title>�Թ�Ѱ·</title>
+		<title>迷宫寻路</title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jcanvas.min.js"></script>
 		<script type="text/javascript" src="js/pathfind.js"></script>
@@ -206,7 +206,7 @@
 				tick = (new Date()).getTime()-tick;
 				render();
 				showPath(path);
-				window.alert("Ѱ·��ɣ�·�����ȣ�"+path.length+",�����ѣ�"+tick+"ms");
+				window.alert("寻路完成，路径长度："+path.length+",共花费："+tick+"ms");
 			}
 			
 			$(function(){
@@ -233,7 +233,7 @@
 	</head>
 	<body>
 		<div id="opera">
-		�Թ���С:
+		迷宫大小:
 		<select id="sizeSel">
 			<option value="10">10</option>
 			<option value="20">20</option>
@@ -241,19 +241,19 @@
 			<option value="100">100</option>
 		</select>
 		
-		�㷨:
+		算法:
 		<select id="algorSel">
 			<option value="BFS">BFS</option>
 			<option value="GREED">GREED</option>
 			<option value="ASTAR">A*</option>
 			<option value="GA">GA</option>
 		</select>
-		<input type="button" id="findBtn"  value="��ʼѰ·"/> 
-		<input type="button" id="resetBtn" value="����Թ�"/>
-		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@��ɽ</a>
+		<input type="button" id="findBtn"  value="开始寻路"/> 
+		<input type="button" id="resetBtn" value="清空迷宫"/>
+		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
 		</div>
 		<div id="desc" style="font:8pt;color:green;">
-		����˵��:�����������ϰ�(�����϶�����)���Ҽ���������Թ������յ�
+		操作说明:左键点击设置障碍(可以拖动设置)，右键点击设置迷宫起点和终点
 		</div>
 	</body>
 </html>

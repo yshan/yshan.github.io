@@ -1,8 +1,8 @@
-<html>
+ï»¿<html>
 	<head>
-		<title> Îå×ÓÆå </title>
+		<title> äº”å­æ£‹ </title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jcanvas.min.js"></script>
 		<script type="text/javascript" src="js/board.js"></script>
@@ -274,13 +274,13 @@
 						showOrder = false;
 					}
 					if(winSide == humanSide){
-						window.alert("ÄãÓ®ÁË!");
+						window.alert("ä½ èµ¢äº†!");
 					}
 					else if(winSide == computerSide){
-						window.alert("ÄãÊäÁË!");
+						window.alert("ä½ è¾“äº†!");
 					}
 					else{
-						window.alert("Ë«·½Æ½ÊÖ!");
+						window.alert("åŒæ–¹å¹³æ‰‹!");
 					}
 					return;
 				}
@@ -327,35 +327,35 @@
 				<td valign="top">
 					<div style="height:540px;font-size:20px;font-family:Arial">
 						<div id="welcome">
-							<span style="font-size:40px;font-family:Arial;color:red">Îå×ÓÆå<br/></span>
-							<span style="font-size:15px;font-family:Arial;text-align:right;">Author:<a href="http://weibo.com/yssss1980">@ÒóÉ½</a></span>
+							<span style="font-size:40px;font-family:Arial;color:red">äº”å­æ£‹<br/></span>
+							<span style="font-size:15px;font-family:Arial;text-align:right;">Author:<a href="http://weibo.com/yssss1980">@æ®·å±±</a></span>
 						</div>
 						
 						<hr/>
 						
 						<div id="opera">
 						<fieldset>	
-						<legend>Âä×Ó</legend>
-						<input type="radio" name="side" value="BLACK" checked/> ºÚ·½<br/>
-						<input type="radio" name="side" value="WHITE"/> °×·½ <br/>
+						<legend>è½å­</legend>
+						<input type="radio" name="side" value="BLACK" checked/> é»‘æ–¹<br/>
+						<input type="radio" name="side" value="WHITE"/> ç™½æ–¹ <br/>
 						</fieldset>
 						<br/>
 						
 						<fieldset>
-						<legend>ÄÑ¶È</legend>
-						<input type="radio" name="level" value="0"/> Éµ¹Ï<br/>
-						<input type="radio" name="level" value="1"/> ¼òµ¥<br/>
-						<input type="radio" name="level" value="2" checked/> ÖĞµÈ<br/>
-						<input type="radio" name="level" value="3"/> À§ÄÑ <br/>
+						<legend>éš¾åº¦</legend>
+						<input type="radio" name="level" value="0"/> å‚»ç“œ<br/>
+						<input type="radio" name="level" value="1"/> ç®€å•<br/>
+						<input type="radio" name="level" value="2" checked/> ä¸­ç­‰<br/>
+						<input type="radio" name="level" value="3"/> å›°éš¾ <br/>
 						</fieldset>
 						<br/>
 						
-						<input type="checkbox" id="orderChk" onclick="troggleOrder()"/>ÏÔÊ¾Âä×Ó´ÎĞò
+						<input type="checkbox" id="orderChk" onclick="troggleOrder()"/>æ˜¾ç¤ºè½å­æ¬¡åº
 						<br/><br/>
 						
-						<input class="button" type="button" onclick="newGame()" value="ĞÂÓÎÏ·"/>
+						<input class="button" type="button" onclick="newGame()" value="æ–°æ¸¸æˆ"/>
 						<br/>
-						<input class="button" type="button" onclick="regret()" value="»ÚÆå"/>
+						<input class="button" type="button" onclick="regret()" value="æ‚”æ£‹"/>
 						<br/>
 						</div>
 						<br/>

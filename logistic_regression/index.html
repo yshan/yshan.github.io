@@ -1,8 +1,8 @@
-<html>
+锘�<html>
     <head>
-        <title>逻辑回归</title>
+        <title>閫昏緫鍥炲綊</title>
         <META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-        <META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+        <META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <script type="text/javascript" src="js/jquery.min.js"></script>
         <script type="text/javascript" src="js/jcanvas.min.js"></script>
         <script type="text/javascript" src="js/regression.js"></script>
@@ -201,10 +201,10 @@
                         console.log("final theta:"+reg.getTheta()+",loss:"+loss);
                         model = reg.getModel();
                         render();
-                        window.alert("训练完成");
+                        window.alert("璁粌瀹屾垚");
                     }
                     else{
-                        window.alert("训练失败");
+                        window.alert("璁粌澶辫触");
                     }
                     triggerEvent(true);
                 };
@@ -277,13 +277,13 @@
         Learn Rate: <input type="text" id="learnRateTxt" size="5" value="0.1"/> <br/>
         Iteration Count: <input type="text" id="iterCountTxt" size="6" value="50000"/> <br/>
         <input type="checkbox" id="regularSel"/> Regularization <br/>
-        <input type="button" value="清除" id="clearBtn"/>
-        <input type="button" value="训练" id="trainingBtn"/>
-        <input type="button" value="停止训练" id="stopBtn"/>
-        &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+        <input type="button" value="娓呴櫎" id="clearBtn"/>
+        <input type="button" value="璁粌" id="trainingBtn"/>
+        <input type="button" value="鍋滄璁粌" id="stopBtn"/>
+        &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@娈峰北</a>
         </div>
         <div id="desc" style="font:8pt;color:green;">
-        操作说明:使用左键和右键绘制不同的点
+        鎿嶄綔璇存槑:浣跨敤宸﹂敭鍜屽彸閿粯鍒朵笉鍚岀殑鐐�
         </div>
     </body>
 </html>

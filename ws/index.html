@@ -1,8 +1,8 @@
-<html>
+ï»¿<html>
 	<head>
-		<title>×îĞ¡¶ş³ËÄâºÏ</title>
+		<title>æœ€å°äºŒä¹˜æ‹Ÿåˆ</title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
 		<script type="text/javascript" src="js/sylvester.js"></script>
@@ -82,12 +82,12 @@
 				var t1 = calcParams(m1);
 				var t2 = calcParams(m2);
 				$.plot("#wscanvas",[{data: orginialData(),points: { show: true }}
-									,{data: modelData(m1,t1),label: "Ä£ĞÍ1"}
-									,{data: modelData(m2,t2),label: "Ä£ĞÍ2"}
+									,{data: modelData(m1,t1),label: "æ¨¡å‹1"}
+									,{data: modelData(m2,t2),label: "æ¨¡å‹2"}
 									]);
 									
-				$('#result').html("Model 1²ÎÊı£º<br/> c1="+t1[0].toFixed(6)+"<br/>c2="+t1[1].toFixed(6)+"<br/>c3="+t1[2].toFixed(6)
-								+"<br/><br/>Model 2²ÎÊı£º<br/> c1="+t2[0].toFixed(6)+"<br/>c2="+t2[1].toFixed(6)+"<br/>c3="+t2[2].toFixed(6)+"<br/>c4="+t2[3].toFixed(6));					
+				$('#result').html("Model 1å‚æ•°ï¼š<br/> c1="+t1[0].toFixed(6)+"<br/>c2="+t1[1].toFixed(6)+"<br/>c3="+t1[2].toFixed(6)
+								+"<br/><br/>Model 2å‚æ•°ï¼š<br/> c1="+t2[0].toFixed(6)+"<br/>c2="+t2[1].toFixed(6)+"<br/>c3="+t2[2].toFixed(6)+"<br/>c4="+t2[3].toFixed(6));					
 			}
 		</script>
 	</head>
@@ -99,10 +99,10 @@
 				</td>
 				<td valign="top">
 					<div style="font-size:20px;font-family:Arial">
-						ÆøÎÂÊı¾İ£º<br/>
+						æ°”æ¸©æ•°æ®ï¼š<br/>
 						<textarea rows="10" cols="40" id="txtData"></textarea>
 						<br/>
-						<input type="button" onclick="calc()" value="¼ÆËã"/>
+						<input type="button" onclick="calc()" value="è®¡ç®—"/>
 					</div>
 					<img src="model.jpg"/> <br/>
 					<div id="result">

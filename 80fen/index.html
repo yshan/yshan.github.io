@@ -1,8 +1,8 @@
-<html>
+ï»¿<html>
 	<head>
-		<title> 80·Ö£¨ÍÏÀ­»ú£© </title>
+		<title> 80åˆ†ï¼ˆæ‹–æ‹‰æœºï¼‰ </title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jcanvas.min.js"></script>
 		<script type="text/javascript" src="js/poker.min.js"></script>
@@ -26,12 +26,12 @@
 			var director;
 			var players;
 			var canvas;
-			var stars = [{name:'ÁÖÇàÏ¼',image:'img/lqx.jpg'},
-						 {name:'ÕÅÂüÓñ',image:'img/zmy.jpg'},
-						 {name:'ÁÖÖ¾Áá',image:'img/lzl.jpg'},						 
-						 {name:'Êæä¿',image:'img/sq.jpg'},
-						 {name:'ÖÜ»ÛÃô',image:'img/zhm.jpg'},
-						 {name:'ÕÔÑÅÖ¥',image:'img/zyz.jpg'}];
+			var stars = [{name:'æ—é’éœ',image:'img/lqx.jpg'},
+						 {name:'å¼ æ›¼ç‰',image:'img/zmy.jpg'},
+						 {name:'æ—å¿—ç²',image:'img/lzl.jpg'},						 
+						 {name:'èˆ’æ·‡',image:'img/sq.jpg'},
+						 {name:'å‘¨æ…§æ•',image:'img/zhm.jpg'},
+						 {name:'èµµé›…èŠ',image:'img/zyz.jpg'}];
 			
 			function drawPokerCard(sx,sy,c,size){
 				var v = val(c);
@@ -157,10 +157,10 @@
 							drawMasterCards(lastMasterOwner,suite,point,mcount);
 						}
 					}
-					var msges = ["×¯¼Ò£º"+(boss==0?'Äã':stars[boss].name)
-								,"±È·Ö£º"+point[0]+":"+point[1]
-								,"µÃ·Ö£º"+score
-								,"ÁÁÖ÷£º"+SUITES_MSG[suite]
+					var msges = ["åº„å®¶ï¼š"+(boss==0?'ä½ ':stars[boss].name)
+								,"æ¯”åˆ†ï¼š"+point[0]+":"+point[1]
+								,"å¾—åˆ†ï¼š"+score
+								,"äº®ä¸»ï¼š"+SUITES_MSG[suite]
 								];
 					var y = OS;
 					for(var i=0;i<msges.length;++i){
@@ -205,7 +205,7 @@
 				  strokeWidth: 1,
 				  x: BW/2, y: BH/2,
 				  font: "60pt Arial",
-				  text: "ÃÀÅ®80·Ö"
+				  text: "ç¾å¥³80åˆ†"
 				});
 			});
 			
@@ -383,10 +383,10 @@
 						var winner = director.endGame();
 						if(winner>0){
 							if(winner%2==0){
-								window.alert("ÄãÓ®ÁË!");
+								window.alert("ä½ èµ¢äº†!");
 							}
 							else{
-								window.alert("ÄãÊäÁË!");
+								window.alert("ä½ è¾“äº†!");
 							}
 						}
 						else{
@@ -461,22 +461,22 @@
 		</script>
 	</head>
 	<body>
-		<input type="button" onclick="resetAll()" value="¿ªÊ¼ÓÎÏ·"/> &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@ÒóÉ½</a><br/>
+		<input type="button" onclick="resetAll()" value="å¼€å§‹æ¸¸æˆ"/> &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@æ®·å±±</a><br/>
 		<div id="mastersbar" style="background:#696969;display:none;position:absolute">
-			<img class="suiteButton" src="res/h_d.jpg" id="suite_h" value="ºìÌÒ" onclick="makeMaster('h')" disabled="disabled"/>
-			<img class="suiteButton" src="res/s_d.jpg" id="suite_s" value="ºÚÌÒ" onclick="makeMaster('s')" disabled="disabled"/>
-			<img class="suiteButton" src="res/d_d.jpg" id="suite_d" value="·½¿é" onclick="makeMaster('d')" disabled="disabled"/>
-			<img class="suiteButton" src="res/c_d.jpg" id="suite_c" value="Ã·»¨" onclick="makeMaster('c')" disabled="disabled"/>
-			<img class="suiteButton" src="res/j_d.jpg" id="suite_j" value="Ğ¡¹í" onclick="makeMaster('j')" disabled="disabled"/>
-			<img class="suiteButton" src="res/jj_d.jpg" id="suite_J" value="´ó¹í" onclick="makeMaster('J')" disabled="disabled"/>
-			<img class="suiteButton" src="res/giveup.jpg" id="nommbtn" value="·ÅÆú" onclick="giveupMakeMaster()"/>
+			<img class="suiteButton" src="res/h_d.jpg" id="suite_h" value="çº¢æ¡ƒ" onclick="makeMaster('h')" disabled="disabled"/>
+			<img class="suiteButton" src="res/s_d.jpg" id="suite_s" value="é»‘æ¡ƒ" onclick="makeMaster('s')" disabled="disabled"/>
+			<img class="suiteButton" src="res/d_d.jpg" id="suite_d" value="æ–¹å—" onclick="makeMaster('d')" disabled="disabled"/>
+			<img class="suiteButton" src="res/c_d.jpg" id="suite_c" value="æ¢…èŠ±" onclick="makeMaster('c')" disabled="disabled"/>
+			<img class="suiteButton" src="res/j_d.jpg" id="suite_j" value="å°é¬¼" onclick="makeMaster('j')" disabled="disabled"/>
+			<img class="suiteButton" src="res/jj_d.jpg" id="suite_J" value="å¤§é¬¼" onclick="makeMaster('J')" disabled="disabled"/>
+			<img class="suiteButton" src="res/giveup.jpg" id="nommbtn" value="æ”¾å¼ƒ" onclick="giveupMakeMaster()"/>
 		</div>
 		<div id="koudibar" style="background:white;display:none;position:absolute">
-			<input type="button" id="koudibtn" value="¿Ûµ×" disabled="disabled"/>
+			<input type="button" id="koudibtn" value="æ‰£åº•" disabled="disabled"/>
 		</div>
 		<div id="playbar" style="background:white;display:none;position:absolute">
-			<input type="button" id="playbtn" value="³öÅÆ" disabled="disabled"/>
-			<input type="button" id="prevbtn" value="ÉÏÒ»ÂÖ" onclick="showPrevTurn()"/>
+			<input type="button" id="playbtn" value="å‡ºç‰Œ" disabled="disabled"/>
+			<input type="button" id="prevbtn" value="ä¸Šä¸€è½®" onclick="showPrevTurn()"/>
 		</div>
 	</body>
 </html>

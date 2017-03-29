@@ -1,8 +1,8 @@
-<html>
+ï»¿<html>
 	<head>
-		<title>Òì³£¼ì²â</title>
+		<title>å¼‚å¸¸æ£€æµ‹</title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
 		<script type="text/javascript" src="js/random.js"></script>
@@ -22,8 +22,8 @@
 			}
 			
 			function rebuildDate(){
-				return [{data:samples,points: { show: true },label: "Õý³£Ñù±¾",color:"green"}
-									,{data: badSamples,points: { show: true,radius:5 },label: "Òì³£Ñù±¾",color:"red"}
+				return [{data:samples,points: { show: true },label: "æ­£å¸¸æ ·æœ¬",color:"green"}
+									,{data: badSamples,points: { show: true,radius:5 },label: "å¼‚å¸¸æ ·æœ¬",color:"red"}
 									];
 			}
 			
@@ -68,8 +68,8 @@
 		</script>
 	</head>
 	<body onload="init()">
-		<input type="button" id="btnRandomGen" value="Ëæ»úÉú³ÉÊý¾Ý" onclick="randomGenData();redraw()"/>
-		<input type="button" id="btnDetect" value="Òì³£¼ì²â" onclick="detect();redraw()"/> &nbsp;&nbsp;&nbsp;Created by ÒóÉ½
+		<input type="button" id="btnRandomGen" value="éšæœºç”Ÿæˆæ•°æ®" onclick="randomGenData();redraw()"/>
+		<input type="button" id="btnDetect" value="å¼‚å¸¸æ£€æµ‹" onclick="detect();redraw()"/> &nbsp;&nbsp;&nbsp;Created by æ®·å±±
 		<div id="wscanvas" style="height:600px;width:600px"></div>
 	</body>
 </html>

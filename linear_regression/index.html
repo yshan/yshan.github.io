@@ -1,8 +1,8 @@
-<html>
+ï»¿<html>
 	<head>
-		<title>ÏßĞÔ»Ø¹é</title>
+		<title>çº¿æ€§å›å½’</title>
 		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
-		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<META charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jcanvas.min.js"></script>
 		<script type="text/javascript" src="js/sylvester.js"></script>
@@ -186,10 +186,10 @@
 						console.log("final theta:"+reg.getTheta()+",loss:"+loss);
 						model = reg.getModel();
 						render();
-						window.alert("ÑµÁ·Íê³É");
+						window.alert("è®­ç»ƒå®Œæˆ");
 					}
 					else{
-						window.alert("ÑµÁ·Ê§°Ü");
+						window.alert("è®­ç»ƒå¤±è´¥");
 					}
 					triggerEvent(true);
 				};
@@ -284,21 +284,21 @@
 		</script>
 	</head>
 	<body>
-		Ä£ĞÍ£º
+		æ¨¡å‹ï¼š
 		<select id="modelSel">
-			<option value="1">Ò»´Î</option>
-			<option value="2">¶ş´Î</option>
-			<option value="3">Èı´Î</option>
+			<option value="1">ä¸€æ¬¡</option>
+			<option value="2">äºŒæ¬¡</option>
+			<option value="3">ä¸‰æ¬¡</option>
 		</select>
-		Ëã·¨£º
+		ç®—æ³•ï¼š
 		<select id="algorSel">
 			<option value="GD">Gradient Descent</option>
 			<option value="NE">Normal Equations</option>
 		</select>
-		<input type="button" value="Çå³ı" id="clearBtn"/>
-		<input type="button" value="ÑµÁ·" id="trainingBtn"/>
-		<input type="button" value="Í£Ö¹ÑµÁ·" id="stopBtn"/>
-		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@ÒóÉ½</a>
+		<input type="button" value="æ¸…é™¤" id="clearBtn"/>
+		<input type="button" value="è®­ç»ƒ" id="trainingBtn"/>
+		<input type="button" value="åœæ­¢è®­ç»ƒ" id="stopBtn"/>
+		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@æ®·å±±</a>
 		<br/>
 	</body>
 </html>
