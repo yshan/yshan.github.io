@@ -1,0 +1,71 @@
+<html>
+	<head>
+		<title>矩阵迭代收敛分析</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function outputM(A){
+				var s ="";
+				for(var i = 1;i<=A.rows();++i){
+					for(var j = 1;j<=A.cols();++j){
+						s += A.e(i,j)+"  ";
+					}
+					s+="<br/>"
+				}
+				return s;
+			}
+			
+			function outputV(V){
+				var s ="";
+				for(var i = 1;i<=V.dimensions();++i){
+					s += V.e(i)+",";
+				}
+				return s;
+			}
+		
+			function calc(){
+				var A = $M(eval($('#_A').val()));
+				var B = $V(eval($('#_B').val()));
+				var L = Matrix.Zero(A.rows(), A.cols());
+				var U = Matrix.Zero(A.rows(), A.cols());
+				var D = Matrix.Zero(A.rows(), A.cols());
+				
+				for(var i = 1;i<=A.rows();++i){
+					for(var j = 1;j<=A.cols();++j){
+						var v = A.e(i,j);
+						if(i==j){
+							D.elements[i-1][j-1]=v;
+						}
+						else if(i>j){
+							L.elements[i-1][j-1]=-v;
+						}
+						else{
+							U.elements[i-1][j-1]=-v;
+						}
+					}
+				}
+				
+				var J = D.inv().x(L.add(U));
+				var s ="Jacobi迭代阵J=D<sup>-1</sup>(L+U)=<br/>";
+				s += outputM(J)+"<br/><br/>";
+				
+				var G = D.subtract(L).inv().x(U);
+				s += "G-S迭代阵G=(D-L)<sup>-1</sup>U=<br/>";
+				s += outputM(G)+"<br/><br/>";
+
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		方程组： AX=B<br/>
+		A=<textarea cols="40" rows="5" id="_A">[[1,0.4,0.4],[0.4,1,0.8],[0.4,0.8,1]]</textarea>
+		<br/>
+		B=<textarea cols="40" rows="5" id="_B">[1,2,3]</textarea>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

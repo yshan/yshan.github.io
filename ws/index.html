@@ -1,0 +1,114 @@
+<html>
+	<head>
+		<title>最小二乘拟合</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			var X0 = [0,0.125,0.25,0.375,0.5,0.625,0.75,0.875];
+			var Y = [-1.7,-2.7,-2.9,-1.8,-0.7,0.8,-0.6,-1.0];
+			var m1 = [function(t){return 1},function(t){return Math.cos(2*Math.PI*t)},function(t){return Math.sin(2*Math.PI*t)}];
+			var m2 = [function(t){return 1},function(t){return Math.cos(2*Math.PI*t)},function(t){return Math.sin(2*Math.PI*t)},function(t){return Math.sin(4*Math.PI*t)}];
+			function d2s(){
+				var s = "";
+				s = X0[0]+","+Y[0];
+				for(var i=1;i<X0.length;++i){
+					s += "\r\n"+X0[i]+","+Y[i];
+				}
+				$('#txtData').val(s);
+			}
+			function s2d(){
+				var data = $('#txtData').val();
+				var result = data.split(/\n/);
+				X0=[]; Y=[];
+				for(var i=0;i<result.length;++i){
+					var t = $.trim(result[i]);
+					if(t.length>=3){
+						var k = t.split(",");
+						X0.push(parseFloat(k[0]));
+						Y.push(parseFloat(k[1]));
+					}
+				}
+			}
+			function orginialData(){
+				var d = [];
+				for(var i=0;i<X0.length;++i){
+					d.push([X0[i],Y[i]]);
+				}
+				return d;
+			}
+			function init(){
+				d2s();
+				calc();
+			}
+			function calcParams(model){
+				var X=[];
+				for(var i=0;i<X0.length;++i){
+					var t = X0[i];
+					var v =[];
+					for(var j = 0;j<model.length;++j){
+						v.push(model[j](t));
+					}
+					X.push(v);
+				}
+			
+				var vx = $M(X);
+				var vy = $V(Y);
+				var vxt  = vx.transpose();
+				var result = vxt.multiply(vx).inv().multiply(vxt).multiply(vy);
+				var theta = [];
+				for(var i=0;i<result.dimensions();++i){
+					theta.push(result.e(i+1));
+				}
+				return theta;
+			}
+			
+			function modelData(model,theta){
+				var d = [];
+				for(var x=0;x<=1.0;x+=0.01){
+					var y =0.0;
+					for(var j=0;j<model.length;++j){
+						y += model[j](x)*theta[j];
+					}
+					d.push([x,y]);
+				}
+				return d;
+			}
+			
+			function calc(){
+				s2d();
+				var t1 = calcParams(m1);
+				var t2 = calcParams(m2);
+				$.plot("#wscanvas",[{data: orginialData(),points: { show: true }}
+									,{data: modelData(m1,t1),label: "模型1"}
+									,{data: modelData(m2,t2),label: "模型2"}
+									]);
+									
+				$('#result').html("Model 1参数：<br/> c1="+t1[0].toFixed(6)+"<br/>c2="+t1[1].toFixed(6)+"<br/>c3="+t1[2].toFixed(6)
+								+"<br/><br/>Model 2参数：<br/> c1="+t2[0].toFixed(6)+"<br/>c2="+t2[1].toFixed(6)+"<br/>c3="+t2[2].toFixed(6)+"<br/>c4="+t2[3].toFixed(6));					
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<table>
+			<tr>
+				<td width="600px" height="600px">
+					<div id="wscanvas" style="height:100%;width:100%"></div>
+				</td>
+				<td valign="top">
+					<div style="font-size:20px;font-family:Arial">
+						气温数据：<br/>
+						<textarea rows="10" cols="40" id="txtData"></textarea>
+						<br/>
+						<input type="button" onclick="calc()" value="计算"/>
+					</div>
+					<img src="model.jpg"/> <br/>
+					<div id="result">
+					</div>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

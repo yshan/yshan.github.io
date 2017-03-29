@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<title>Newton插值</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc(){
+				var x0 = $('#_x0').val()*1.0;
+				var x1 = $('#_x1').val()*1.0;
+				var x2 = $('#_x2').val()*1.0;
+				var y0 = $('#_y0').val()*1.0;
+				var y1 = $('#_y1').val()*1.0;
+				var y2 = $('#_y2').val()*1.0;
+				
+				var f01 = (y0-y1)/(x0-x1);
+				$('#_f01').text(f01);
+				
+				var f12 = (y1-y2)/(x1-x2);
+				$('#_f12').text(f12);
+				
+				var f012 = (f12 - f01)/(x2-x0);
+				$('#_f012').text(f012);
+				
+				var s="一次Newton多项式为：N1(x)="+y0+"+"+f01+"*(x-"+x0+")<br/>";
+				s += "二次Newton多项式为：N2(x)=N1(x)+"+f012+"*(x-"+x0+")*(x-"+x1+")<br/>";
+				
+				var x = $('#_x').val()*1.0;
+				
+				var n1 = y0+f01*(x-x0);
+				var n2 = n1 + f012*(x-x0)*(x-x1);
+				
+				s += "求得N1("+x+")="+n1+"</br>";
+				s += "求得N2("+x+")="+n2+"</br>";
+				
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		计算1次和2次的Newton插值：<br/>
+		<table>
+			<tr>
+				<td>x<sub>k</sub></td>
+				<td>f(x<sub>k</sub>)</td>
+				<td>一阶差商</td>
+				<td>二阶差商</td>
+			</tr>
+			<tr>
+				<td><input type="text" value="0.5" id="_x0"/></td>
+				<td><input type="text" value="-0.693147" id="_y0"/></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><input type="text" value="0.6" id="_x1"/></td>
+				<td><input type="text" value="-0.510826" id="_y1"/></td>
+				<td><span id="_f01"></span></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><input type="text" value="0.7" id="_x2"/></td>
+				<td><input type="text" value="-0.357765" id="_y2"/></td>
+				<td><span id="_f12"></span></td>
+				<td><span id="_f012"></span></td>
+			</tr>
+		</table>
+		求 x=<input type="text" value="0.54" id="_x"/>的值
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

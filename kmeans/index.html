@@ -1,0 +1,191 @@
+<html>
+	<head>
+		<title>K-Means</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+		<script type="text/javascript" src="js/random.js"></script>
+		<script>
+			var samples = [];
+			var SIZE = 100;
+			var graph;
+			var rnd = new Random(1234);
+			
+			function init(){
+				samples = [];
+				for(var c = 0;c<8;++c){
+					var mx1 = Math.random()*60+20;
+					var mx2 = Math.random()*60+20;
+					var stdvar = Math.random()*10;
+					var count = Math.random()*100;
+					for(var i=0;i<count;++i){
+						var x1 = rnd.normal(mx1, stdvar) ;
+						var x2 = rnd.normal(mx2, stdvar) ;
+						samples.push([x1,x2]);
+					}
+				}
+				graph = $.plot("#wscanvas",[{data:samples,points:{show:true}, color:"black"}],{yaxis: {min: 0,	max: 100},	xaxis: {min: 0,	max: 100}});
+			}
+			
+			function dist(a,b){
+				var dx = a[0]-b[0];
+				var dy = a[1]-b[1];
+				return Math.sqrt(dx*dx+dy*dy);
+			}
+			
+			function canopy_clustering(u,t1,t2){
+				var canopies = [];
+				
+				for(var i=0;i<samples.length;++i){
+					var sample = samples[i];
+					
+					var newCanpoy= true;
+					
+					for(var k=0;k<canopies.length;++k){
+						var canpoy = canopies[k];
+						var d = dist(canpoy[0],sample);
+						if(d<=t1){
+							canpoy.push(sample);
+						}
+						if(d<=t2){
+							newCanpoy = false;
+						}
+					}
+					
+					if(newCanpoy){
+						canopies.push([sample]);
+					}
+				}
+				
+				for(var k=0;k<canopies.length;++k){
+					var canpoy = canopies[k];
+					var sx1=0, sx2=0;
+					var cl = canpoy.length;
+					for(var i=0;i<cl;++i){
+						var c = canpoy[i];
+						sx1 += c[0];
+						sx2 += c[1];
+					}
+					u.push([sx1*1.0/cl,sx2*1.0/cl]);
+				}
+				
+				return u.length;
+			}
+			
+			function detect(){
+				var byManual = ($('input[name=rdoPreCluster]:checked').val()=="0");
+				
+				var K; //cluster num
+				var u = []; //the center of each cluster
+				var points = []; //each cluster's points
+				
+				if(byManual){
+					// random init K cluster center
+					K = parseInt($("#txtCluster").val());
+					for(var k=0;k<K;++k){
+						u.push([Math.random()*SIZE,Math.random()*SIZE]);
+					}
+				}
+				else{
+					var t1 = parseInt($('#txtT1').val());
+					var t2 = parseInt($('#txtT2').val());
+					if(t1<=t2){
+						alert('t1 must be larger than t2');
+						return;
+					}
+					K = canopy_clustering(u,t1,t2);
+				}
+				
+				$("#btnDetect").attr('disabled','disabled');
+				$("#btnRandomGen").attr('disabled','disabled');
+				
+				for(var k=0;k<K;++k){
+					points[k]=[];
+				}
+				
+				var record = [];
+				for(var i=0;i<samples.length;++i){
+					record[i] = -1;
+				}
+				
+				var redraw = function(){
+					var data = [];
+					
+					for(var k=0;k<K;++k){
+						data.push({data:points[k],points:{show:true}});
+					}
+					
+					graph.setData(data);
+					graph.draw();
+				}
+				
+				
+				var f = function(){
+					var changed = false;
+					var nu = [];
+					var nc = [];
+					for(var k=0;k<K;++k){
+						nu.push([0,0]);
+						nc.push(0);
+						points[k]=[];
+					}
+					for(var i=0;i<samples.length;++i){
+						var minDist = 9999999;
+						var closest = -1;
+						var sample = samples[i];
+						
+						for(var k=0;k<K;++k){
+							var d = dist(sample,u[k]);
+							if(d<minDist){
+								minDist = d;
+								closest = k;
+							}
+						}
+						
+						if(closest!=record[i]){
+							changed = true;
+							record[i] = closest;
+						}
+
+						points[closest].push(sample);
+						nu[closest][0] += sample[0] ;
+						nu[closest][1] += sample[1] ;
+						nc[closest]++;
+					}
+					
+					for(var k=0;k<K;++k){
+						if(nc[k]>0){
+							u[k][0] = nu[k][0]/nc[k];
+							u[k][1] = nu[k][1]/nc[k];
+						}
+					}
+					
+					redraw();
+					
+					console.log(u);
+					
+					if(changed){
+						setTimeout(f,1000/K);
+					}
+					else{
+						alert("Analyze completed!");
+						$("#btnDetect").removeAttr('disabled');
+						$("#btnRandomGen").removeAttr('disabled');
+					}
+				};
+				
+				f();
+			}
+
+		
+		</script>
+	</head>
+	<body onload="init()">
+		<input type="radio" name="rdoPreCluster" value="0" checked>Manual clustering： K-<input type="text" id="txtCluster" value="8" size="2" /><br/>
+		<input type="radio" name="rdoPreCluster" value="1">Canopy clustering： T1-<input type="text" id="txtT1" value="30" size="2" /> &nbsp; T2-<input type="text" id="txtT2" value="20" size="2" /><br/>
+		<input type="button" id="btnDetect" value="聚类分析" onclick="detect();"/> 
+		<input type="button" id="btnRandomGen" value="随机生成数据" onclick="init()"/> &nbsp;&nbsp;&nbsp;Created by 殷山
+		<div id="wscanvas" style="height:560px;width:560px"></div>
+	</body>
+</html>

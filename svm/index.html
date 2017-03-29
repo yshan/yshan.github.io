@@ -1,0 +1,188 @@
+<html>
+	<head>
+		<title>SVM</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+		<script type="text/javascript" src="js/random.js"></script>
+        <script type="text/javascript" src="js/svm.js"></script>
+		<script>
+			var samples = [];
+            var labels = [];
+			var SIZE = 100;
+			var graph;
+			var rnd = new Random(1234);
+			
+			function init(){
+				samples = [];
+                labels = [];
+                c0 = [];
+                c1 = [];
+				for(var c = 0;c<2;++c){
+					var mx1 = Math.random()*60+20;
+					var mx2 = Math.random()*60+20;
+					var stdvar = Math.random()*20;
+					var count = Math.random()*100;
+					for(var i=0;i<count;++i){
+						var x1 = rnd.normal(mx1, stdvar) ;
+						var x2 = rnd.normal(mx2, stdvar) ;
+                        var  p = [x1,x2];
+						samples.push(p);
+                        labels.push(c==0?-1:1);
+                        if(c==0){
+                            c0.push(p);
+                        }
+                        else{
+                            c1.push(p);
+                        }
+					}
+				}
+				graph = $.plot("#wscanvas",[{data:c0,points:{show:true}, color:"red"},{data:c1,points:{show:true}, color:"blue"}],{yaxis: {min: 0,	max: 100},	xaxis: {min: 0,	max: 100}});
+			}
+			
+			function train(){
+				var kernelMode = parseInt($('input[name=rdoKernel]:checked').val());
+				
+				svm = new svmjs.SVM();
+                svm.train(samples, labels, {C: 1.0}); 
+                
+                //First: Draw canvas
+                var ctx = graph.getCanvas().getContext("2d");
+                
+                for(var x=0;x<100;++x){
+                    for(var y=0;y<100;++y){
+                        var lx = x-0.5
+                        var ly = y-0.5
+                        var rx = x+0.5
+                        var ry = y+0.5
+                        
+                        if(lx<0) lx=0
+                        if(ly<0) ly=0
+                        if(rx>100) rx=100
+                        if(ry>100) ry=100
+                        
+                        var p1 = graph.pointOffset({ x: lx, y: ly}); //translate a value to pixels
+                        var p2 = graph.pointOffset({ x: rx, y: ry}); 
+                        if(svm.marginOne([x,y])<0){
+                            ctx.fillStyle = "red";
+                        }
+                        else{
+                            ctx.fillStyle = "blue";
+                        }
+                        ctx.fillRect(p1.x,p1.y,p2.x,p2.y)
+                    }
+                }
+                
+                
+                
+                
+				/*
+				if(byManual){
+					// random init K cluster center
+					K = parseInt($("#txtCluster").val());
+					for(var k=0;k<K;++k){
+						u.push([Math.random()*SIZE,Math.random()*SIZE]);
+					}
+				}
+				else{
+					var t1 = parseInt($('#txtT1').val());
+					var t2 = parseInt($('#txtT2').val());
+					if(t1<=t2){
+						alert('t1 must be larger than t2');
+						return;
+					}
+					K = canopy_clustering(u,t1,t2);
+				}
+				
+				$("#btnDetect").attr('disabled','disabled');
+				$("#btnRandomGen").attr('disabled','disabled');
+				
+				for(var k=0;k<K;++k){
+					points[k]=[];
+				}
+				
+				var record = [];
+				for(var i=0;i<samples.length;++i){
+					record[i] = -1;
+				}
+				
+				var redraw = function(){
+					var data = [];
+					
+					for(var k=0;k<K;++k){
+						data.push({data:points[k],points:{show:true}});
+					}
+					
+					graph.setData(data);
+					graph.draw();
+				}
+				
+				
+				var f = function(){
+					var changed = false;
+					var nu = [];
+					var nc = [];
+					for(var k=0;k<K;++k){
+						nu.push([0,0]);
+						nc.push(0);
+						points[k]=[];
+					}
+					for(var i=0;i<samples.length;++i){
+						var minDist = 9999999;
+						var closest = -1;
+						var sample = samples[i];
+						
+						for(var k=0;k<K;++k){
+							var d = dist(sample,u[k]);
+							if(d<minDist){
+								minDist = d;
+								closest = k;
+							}
+						}
+						
+						if(closest!=record[i]){
+							changed = true;
+							record[i] = closest;
+						}
+
+						points[closest].push(sample);
+						nu[closest][0] += sample[0] ;
+						nu[closest][1] += sample[1] ;
+						nc[closest]++;
+					}
+					
+					for(var k=0;k<K;++k){
+						if(nc[k]>0){
+							u[k][0] = nu[k][0]/nc[k];
+							u[k][1] = nu[k][1]/nc[k];
+						}
+					}
+					
+					redraw();
+					
+					console.log(u);
+					
+					if(changed){
+						setTimeout(f,1000/K);
+					}
+					else{
+						alert("Analyze completed!");
+						$("#btnDetect").removeAttr('disabled');
+						$("#btnRandomGen").removeAttr('disabled');
+					}
+				};
+				
+				f();*/
+			}
+
+		
+		</script>
+	</head>
+	<body onload="init()">
+        核函数：<input type="radio" name="rdoKernel" value="0" checked>linear  <input type="radio" name="rdoKernel" value="1">rbf <br/>
+		<input type="button" id="btnTrain" value="训练" onclick="train()"/> 
+		<input type="button" id="btnRandomGen" value="随机生成数据" onclick="init()"/> &nbsp;&nbsp;&nbsp;Created by 殷山
+		<div id="wscanvas" style="height:560px;width:560px"></div>
+	</body>
+</html>

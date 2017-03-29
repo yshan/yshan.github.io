@@ -1,0 +1,69 @@
+<html>
+	<head>
+		<title>最小二乘</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function getModel(){
+				var m = $('#_model').val().split(",");
+				var model = [];
+				for(var i=0;i<m.length;++i){
+					var f;
+					eval("f= function(x){return ("+m[i]+");}");
+					model.push(f);
+				}
+				return model;
+			}
+		
+			function calc(){
+				var X = eval($('#_X').val());
+				var Y = eval($('#_Y').val());
+				var model = getModel();
+				var xx = [];
+				for(var i=0;i<X.length;++i){
+					var row = [];
+					var x = X[i];
+					for(var j=0;j<model.length;++j){
+						row.push(model[j](x));
+					}
+					xx.push(row);
+				}
+				var vx = $M(xx);
+				var vy = $V(Y);
+				var vxt  = vx.transpose();
+				var result = vxt.multiply(vx).inv().multiply(vxt).multiply(vy);
+				var s ="求出参数为：<br/>"; 
+				for(var i=1;i<=result.dimensions();++i){
+					s += result.e(i)+"<br/>";
+				}
+				
+				var diff = 0.0;
+				for(var i=0;i<X.length;++i){
+					var x = X[i];
+					var yy = 0.0;
+					for(var j=0;j<model.length;++j){
+						yy += result.e(j+1)*model[j](x);
+					}
+					diff  += (yy-Y[i])*(yy-Y[i]);
+				}
+				diff = Math.sqrt(diff);
+				s += "均方误差为："+diff+ "<br/>";
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		X:<br/>
+		<textarea cols="40" rows="5" id="_X">[19,25,31,38,44]</textarea>
+		<br/>
+		Y:<br/>
+		<textarea cols="40" rows="5" id="_Y">[19.0,32.3,49.0,73.3,97.8]</textarea>
+		<br/>
+		模型：<input type="text" id="_model" value="1,x*x"/>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

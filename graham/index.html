@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<title>凸包扫描</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/graham.js"></script>
+		<script>
+			var BW = 800; //board width
+			var BGCOLOR = "lightgray";
+			var nodeCount;
+			var graph = [];
+			var nodes = [];
+			var nodeW = 6;
+			
+			function drawNode(index,color){
+				var n = nodes[index];
+				$("canvas").drawEllipse({
+					  strokeStyle: "white",
+					  strokeWidth: 1,	
+					  fillStyle: color,
+					  x: n[0], y:n[1],
+					  width: nodeW, height: nodeW
+				});
+			}
+			
+			function drawConnection(i,j,color){
+				var n1 = nodes[i];
+				var n2 = nodes[j];
+				var obj = {
+				  strokeStyle: color,
+				  strokeWidth: 1,
+				  rounded: true,
+				  x1:n1[0],
+				  y1:n1[1],
+				  x2:n2[0],
+				  y2:n2[1]
+				};
+				$("canvas").drawLine(obj);
+			}
+            
+            function drawConvex(points){
+                render();
+                drawNode(points[0],"red");
+                for(var i=1;i<points.length;++i){
+                    drawConnection(points[i],points[i-1],"black");
+                    drawNode(points[i],"red");
+                }
+            }
+			
+			function render(){
+				$("canvas").drawRect({
+				  fillStyle: BGCOLOR,
+				  x: 0, y: 0,
+				  width: BW,
+				  height: BW,
+				  fromCenter: false
+				});
+				for(var i=0;i<nodeCount;++i){
+					drawNode(i,"black");
+				}
+			}
+			
+			function rndf(n){
+				return Math.floor(Math.random()*n);
+			}
+			
+			function reset(){
+				nodeCount  = parseInt($("#txtNodeCount").val());
+				if(nodeCount == 0){
+					nodeCount = 10;
+				}
+				nodes = new Array(nodeCount);
+                for(var i=0;i<nodeCount;++i){
+                    var x = rndf(BW*2/3)+BW/6;
+                    var y = rndf(BW*2/3)+BW/6;
+                    nodes[i]= [x,y];//random position
+                }
+				render();
+			}
+			
+			function find(){
+				render();
+                $('#btnFind').attr('disabled','disabled');
+                $('#btnReset').attr('disabled','disabled');
+                var scanner = new Graham(nodes,nodeCount);
+                var f = function(){
+                    var next = scanner.scan();
+                    var points = scanner.getConvexHull();
+                    if(next){
+                        drawConvex(points);
+                        setTimeout(f,1000);
+                    }
+                    else{
+                        points.push(points[0]);
+                        drawConvex(points);
+                        window.alert("Find Convex Hull!");
+                        $('#btnFind').removeAttr('disabled');
+                        $('#btnReset').removeAttr('disabled');
+                    }
+                };
+                
+                f();
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				//create canvas
+				var cv = document.createElement('canvas');
+				cv.width = BW;
+				cv.height = BW;
+				cv.style.background = BGCOLOR;
+				document.body.appendChild(cv);
+				reset();
+			});
+		</script>
+	</head>
+	<body>
+		Point Count:<input type="text" id="txtNodeCount" size="3" value="10"/>
+		<input type="button" id="btnReset" value="Reset" onclick="reset()"/>
+		<input type="button" id="btnFind" value="Find Convex Hull" onclick="find()"/>
+		&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+		<br/>
+	</body>
+</html>

@@ -1,0 +1,152 @@
+<html>
+	<head>
+		<title>DBSCAN</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+		<script type="text/javascript" src="js/random.js"></script>
+		<script>
+			var samples = [];
+			var SIZE = 100;
+			var graph;
+			var rnd = new Random(1234);
+			
+			function init(){
+				samples = [];
+				for(var c = 0;c<8;++c){
+					var mx1 = Math.random()*60+20;
+					var mx2 = Math.random()*60+20;
+					var stdvar = Math.random()*10;
+					var count = Math.random()*100;
+					for(var i=0;i<count;++i){
+						var x1 = rnd.normal(mx1, stdvar) ;
+						var x2 = rnd.normal(mx2, stdvar) ;
+						samples.push([x1,x2]);
+					}
+				}
+				graph = $.plot("#wscanvas",[{data:samples,points:{show:true}, color:"black"}],{yaxis: {min: 0,	max: 100},	xaxis: {min: 0,	max: 100}});
+			}
+			
+			function dist(a,b){
+				var dx = a[0]-b[0];
+				var dy = a[1]-b[1];
+				return Math.sqrt(dx*dx+dy*dy);
+			}
+			
+			function detect(){
+				var epson = parseInt($("#txtEpson").val());
+				var minPts = parseInt($("#txtMinPts").val());
+				
+				var ss = samples.length;
+				var DD = new Array(ss);
+				var visited = new Array(ss);
+				var record = new Array(ss);
+				for(var i=0;i<ss;++i){
+					DD[i] = new Array(ss);
+					visited[i] = false;
+					record[i] = -1;
+				}
+				
+				for(var i=0;i<ss;++i){
+					DD[i][i] = 0;
+					for(var j=i+1;j<ss;++j){
+						DD[i][j] = DD[j][i]= dist(samples[i],samples[j]);
+					}
+				}
+				
+				$("#btnDetect").attr('disabled','disabled');
+				$("#btnRandomGen").attr('disabled','disabled');
+				
+				var C = 0;
+				var clusters = [];
+				var noises = [];
+				
+				var redraw = function(){
+					var data = [];
+					
+					data.push({data:noises,points:{show:true,radius:2}, color:"black"});
+					
+					for(var k=0;k<clusters.length;++k){
+						data.push({data:clusters[k],points:{show:true}});
+					}
+					
+					graph.setData(data);
+					graph.draw();
+				}
+				
+				var ci = 0;
+				
+				var regionQuery = function(p){
+					var result = [];
+					for(var j=0; j<ss;++j){
+						if(DD[p][j]<epson){
+							result.push(j);
+						}
+					}
+					return result;
+				}
+				
+
+				var f = function(){
+					for(;ci<ss && visited[ci];++ci){
+					}
+					
+					if(ci == ss){
+						redraw();
+						alert("Analyze completed!");
+						$("#btnDetect").removeAttr('disabled');
+						$("#btnRandomGen").removeAttr('disabled');
+						return;
+					}
+					
+					visited[ci] = true;
+					var cp = samples[ci];
+					
+					//first, get neighbours of current point
+					var neighbours = regionQuery(ci);
+					
+					if(neighbours.length<minPts){
+						noises.push(cp);
+						return f();
+					}
+					else{
+						var newcluster = [];
+						++C;
+						console.log("New cluster:"+C);
+						for(var cj =0;cj<neighbours.length;++cj){
+							var pj = neighbours[cj];
+							if(!visited[pj]){
+								visited[pj] = true;
+								var newneighbours = regionQuery(pj);
+								if(newneighbours.length>=minPts){
+									for(var k=0;k<newneighbours.length;++k){
+										neighbours.push(newneighbours[k]);
+									}
+								}
+							}
+							if(record[pj]==-1){
+								newcluster.push(samples[pj]);
+								record[pj] = C;
+							}
+						}
+						clusters.push(newcluster);
+					}
+
+					redraw();
+					setTimeout(f,10);
+				};
+				
+				f();
+			}
+
+		
+		</script>
+	</head>
+	<body onload="init()">
+		最大距离： <input type="text" id="txtEpson" value="5" size="2" /> &nbsp; 簇最小点个数-<input type="text" id="txtMinPts" value="20" size="2" /><br/>
+		<input type="button" id="btnDetect" value="Run DBSCAN" onclick="detect();"/> 
+		<input type="button" id="btnRandomGen" value="随机生成数据" onclick="init()"/> &nbsp;&nbsp;&nbsp;Created by 殷山
+		<div id="wscanvas" style="height:560px;width:560px"></div>
+	</body>
+</html>

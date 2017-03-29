@@ -1,0 +1,112 @@
+<html>
+    <head>
+        <title>Dijkstra</title>
+        <META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+        <META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+        <script type="text/javascript" src="js/raphael-min.js"></script>
+        <script type="text/javascript" src="js/dracula_graffle.js"></script>
+        <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="js/dracula_graph.js"></script>
+        <script type="text/javascript" src="js/dijkstra.js"></script>
+        <script>
+            var BW = 800; //board width
+            var BGCOLOR = "lightgray";
+            var nodeCount;
+            var density;
+            var graph = [];
+            var renderer,layouter,g;
+            
+            function rndf(n){
+                return Math.floor(Math.random()*n);
+            }
+            
+            function reset(){
+                nodeCount  = parseInt($("#txtNodeCount").val());
+                if(nodeCount == 0){
+                    nodeCount = 10;
+                }
+                density  = parseInt($("#txtDensity").val());
+                if(density<1 || density>9){
+                    density = 5;
+                }
+                graph = new Array(nodeCount);
+                for(var i=0;i<nodeCount;++i){
+                    graph[i] = new Array(nodeCount);
+                    graph[i][i] = 0;
+                }
+
+                for(var i=0;i<nodeCount;++i){
+                    for(var j=i+1;j<nodeCount;++j){
+                        graph[i][j] = graph[j][i] =(Math.random()*10)>density?0:(rndf(100)+1);
+                    }
+                }
+                
+                g.nodes={};
+                g.edges = [];
+                for(var i=0;i<nodeCount;++i){
+                    g.addNode('n'+i,{
+                          label: (i+1),
+                        });
+                }
+                
+                for(var i=0;i<nodeCount;++i){
+                    for(var j=i+1;j<nodeCount;++j){
+                        if(graph[i][j]>0){
+                            g.addEdge('n'+i,'n'+j,{label :graph[i][j]});
+                        }
+                    }
+                }
+                layouter.layout();
+                renderer.clear();
+                renderer.draw();
+            }
+            
+            function find(){
+                $('#btnFind').attr('disabled','disabled');
+                $('#btnReset').attr('disabled','disabled');
+                
+                var finder = new DijkstraFinder(graph,0,nodeCount-1);
+                var f = function(){
+                    var over = !(finder.travel());
+                    var current = finder.getCurrentNode();
+                    renderer.highlightNode(g.nodes['n'+current],'black');
+                
+                    if(over){ // search end
+                        window.alert("Find Shortest Path："+finder.getShorestDistance());
+                        var path = finder.getShorestPath();
+                        path.forEach(function(node){
+                            renderer.highlightNode(g.nodes['n'+node],'red');
+                        });
+                        
+                        $('#btnFind').removeAttr('disabled');
+                        $('#btnReset').removeAttr('disabled');
+                    }
+                    else{
+                        setTimeout(f,1000);
+                    }
+                }
+                
+                f();
+            }
+            
+            $(function(){
+                if (!window.console){
+                    console = {log:function(){},debug:function(){}};
+                }
+                g = new Graph();
+                layouter = new Graph.Layout.Spring(g);
+                renderer = new Graph.Renderer.Raphael('divGraph', g, BW, BW);
+                reset();
+            });
+        </script>
+    </head>
+    <body>
+        Node Count:<input type="text" id="txtNodeCount" size="3" value="10"/>
+        Density(1-9):<input type="text" id="txtDensity" size="1" value="5"/>
+        <input type="button" id="btnReset" value="Reset" onclick="reset()"/>
+        <input type="button" id="btnFind" value="Find Shorest Path" onclick="find()"/>
+        &nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+        <br/>
+        <div id="divGraph" style="height:800px;width:800px;background:#cccccc"></div>
+    </body>
+</html>

@@ -1,0 +1,482 @@
+<html>
+	<head>
+		<title> 80分（拖拉机） </title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/poker.min.js"></script>
+		<script type="text/javascript" src="js/director.min.js"></script>
+		<script type="text/javascript" src="js/player.min.js"></script>
+		<style>
+			.suiteButton{
+				width:30px;
+				height:30px;
+				magin:0px auto;
+				border:0px;
+			}
+		</style>
+		<script>
+			var OS = 10; 
+			var CH = 100; //card height
+			var BW = 800; //board width
+			var BH = 600; //board height
+			var CI = 20;
+			var POS =[[OS,BH-CH,CI,0],[OS,BH-3*CH,CI,0],[OS,BH-4.5*CH,CI,0],[OS,BH-6*CH,CI,0],[(BW-8*CI*2-CH)/2,(BH-CH)/2,CI*2,0]];
+			var director;
+			var players;
+			var canvas;
+			var stars = [{name:'林青霞',image:'img/lqx.jpg'},
+						 {name:'张曼玉',image:'img/zmy.jpg'},
+						 {name:'林志玲',image:'img/lzl.jpg'},						 
+						 {name:'舒淇',image:'img/sq.jpg'},
+						 {name:'周慧敏',image:'img/zhm.jpg'},
+						 {name:'赵雅芝',image:'img/zyz.jpg'}];
+			
+			function drawPokerCard(sx,sy,c,size){
+				var v = val(c);
+				if(v[1]=='O'){
+					v[0]=(v[0]=='j'?'s':'h');
+				}
+				canvas.drawPokerCard(sx,sy,size?size:CH,v[0],v[1]);
+			}
+			
+			function drawPlayerCards(p,selectedCards){
+				var player = players[p];
+				var cards = player.getCards();
+				var pos = POS[p];
+				var sx = pos[0] , sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				if(p==0){
+					sx = pos[0] = (BW-(cards.length-1)*CI-CH)/2;
+				}
+				var offset = 30;
+				if(selectedCards){
+					canvas.clearRect(sx,sy-offset,dx*cards.length+CH,CH+offset);
+				}
+				for(var j=0;j<cards.length;++j){
+					var y = sy;
+					if(selectedCards && selectedCards[j]){
+						y -= offset;
+					}
+					drawPokerCard(sx,y,cards[j]);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawTurnCards(p,cards){
+				var len = (cards.length-1)*CI+CH*0.8
+				var turnPos =[[(BW-len)/2,BH-CH-150],[BW-len-140,(BH-CH)/2],[(BW-len)/2,CH+80],[140,(BH-CH)/2]];
+				var pos = turnPos[p];
+				var sx = pos[0] , sy=pos[1];
+				var dx = CI , dy=0;
+				for(var j=0;j<cards.length;++j){
+					drawPokerCard(sx,sy,cards[j]);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawDiCards(){
+				var pos = POS[4];
+				var sx = pos[0] , sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				var cards = director.getDiCards();
+				for(var i=0;i<cards.length;++i){
+					var c = cards[i];
+					drawPokerCard(sx,sy,c);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawMasterCards(p,suite,point,count){
+				var len = count*CH*0.8;
+				var turnPos =[[(BW-len)/2,BH-CH-150],[BW-len-140,(BH-CH)/2],[(BW-len)/2,CH+80],[140,(BH-CH)/2]];
+				var pos = turnPos[p];
+				var sx = pos[0] , sy=pos[1];
+				var dx = CH*0.8 , dy=0;
+				if(suite=='j'){
+					suite='s';
+					point='O'; 
+				}
+				else if(suite=='J'){
+					suite='h';
+					point='O'; 
+				}
+				for(var j=0;j<count;++j){
+					canvas.drawPokerCard(sx,sy,CH,suite,point);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawStars(p){
+				var locs=[[BW-60,BH/2],[BW/2,80],[60,BH/2]];
+				var loc = locs[p-1];
+				$("canvas").drawImage({
+				  source: stars[p].image,
+				  x: loc[0], y: loc[1]
+				});
+				$("canvas").drawText({
+				  fillStyle: "orange",
+				  strokeStyle: "darkorange",
+				  strokeWidth: 1,
+				  x: loc[0], y: loc[1]+90,
+				  font: "14pt Arial",
+				  text: stars[p].name
+				});
+			}
+			
+			function render(turn){
+				canvas.clearRect(0,0,BW,BH);
+				if(director && director.getStatus()>0){
+					drawPlayerCards(0);
+					for(var i=1;i<4;++i){
+						drawStars(i);
+					}
+					
+					//drawDiCards();
+					//show game information
+					var boss = director.getBoss();
+					var score = director.getCurrentScore();
+					var point = director.getPoints();
+					var suite = director.getMasterSuite();
+					var status = director.getStatus();
+					if(status==STATUS.PLAY){
+						if(!turn){
+							turn = director.getCurrentTurn();
+						}
+						if(turn){
+							for(var i=0;i<turn.cards.length;++i){
+								drawTurnCards((turn.leader+i)%4,turn.cards[i]);
+							}
+						}
+					}
+					else if(status==STATUS.DEAL){
+						var lastMasterOwner = director.getLastMasterOwner();
+						if(lastMasterOwner>=0){
+							var mcount = director.getCurrentMasterCount();
+							drawMasterCards(lastMasterOwner,suite,point,mcount);
+						}
+					}
+					var msges = ["庄家："+(boss==0?'你':stars[boss].name)
+								,"比分："+point[0]+":"+point[1]
+								,"得分："+score
+								,"亮主："+SUITES_MSG[suite]
+								];
+					var y = OS;
+					for(var i=0;i<msges.length;++i){
+						$("canvas").drawText({
+						  fillStyle: "darkgreen",
+						  strokeStyle: "darkgreen",
+						  strokeWidth: 1,
+						  x: BW-120, y: y,
+						  font: "14pt Arial",
+						  fromCenter: false,
+						  text: msges[i]
+						});
+						y += 30;
+					}
+				}
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				//create canvas
+				var cv = document.createElement('canvas');
+				cv.width = BW;
+				cv.height = BH;
+				cv.style.background = "lightblue";
+				document.body.appendChild(cv);
+				canvas = cv.getContext('2d');
+				
+				//adjust the divs position
+				var w = $('#mastersbar').width();
+				$('#mastersbar').offset({top:BH-CH-10,left:BW/2-w/2});
+				w = $('#koudibar').width();
+				$('#koudibar').offset({top:BH-CH-10,left:BW/2-w/2});
+				w = $('#playbar').width();
+				$('#playbar').offset({top:BH-CH-10,left:BW/2-w/2});
+				render();
+				
+				$("canvas").drawText({
+				  fillStyle: "green",
+				  strokeStyle: "green",
+				  strokeWidth: 1,
+				  x: BW/2, y: BH/2,
+				  font: "60pt Arial",
+				  text: "美女80分"
+				});
+			});
+			
+			function updateMasterBar(){
+				if(director.getStatus()!=STATUS.DEAL){
+					$('#mastersbar').hide();
+					return;
+				}
+				$('#mastersbar').show();
+				
+				var result = director.getMasterSuites(0);
+				var enabledImg=["res/h.jpg","res/s.jpg","res/d.jpg","res/c.jpg","res/j.jpg","res/jj.jpg"];
+				var disabledImg=["res/h_d.jpg","res/s_d.jpg","res/d_d.jpg","res/c_d.jpg","res/j_d.jpg","res/jj_d.jpg"];
+				for(var i=0;i<SUITES.length;++i){
+					var sid = "#suite_"+SUITES[i];
+					var match = false;
+					for(var j=0;j<result.length;++j){
+						if(SUITES[i]==result[j]){
+							match = true;
+							break;
+						}
+					}
+					if(!match){
+						$(sid).attr('disabled','disabled');
+						$(sid).attr('src',disabledImg[i]);
+					}
+					else{
+						$(sid).removeAttr('disabled');
+						$(sid).attr('src',enabledImg[i]);
+					}
+				}
+			}
+			
+			function updateKoudiBar(){
+				if(director.getStatus()!=STATUS.KOUDI){
+					$('#koudibar').hide();
+					return;
+				}
+				$('#koudibar').show();
+			}
+			
+			function updatePlayBar(){
+				if(director.getStatus()!=STATUS.PLAY){
+					$('#playbar').hide();
+					return;
+				}
+				$('#playbar').show();
+			}
+			
+			function makeMaster(suite){
+				director.makeMaster(0,suite);
+				updateMasterBar();
+			}
+			
+			function cardSelector(){
+				var selectedCards = {};
+				
+				this.getSelectedCount = function(){
+					var count = 0;
+					for(var c in selectedCards){
+						++count;
+					}
+					return count;
+				}
+				
+				this.getSelectedCards = function(){
+					var result = [];
+					var cards = players[0].getCards();
+					for(var c in selectedCards){
+						result.push(cards[c]);
+					}
+					return result;
+				}
+				
+				this.handle = function(cb){
+					$("canvas").unbind();
+					$("canvas").click(function(event){
+						var position = $("canvas").position();
+						var sx = POS[0][0];
+						var sy = POS[0][1]-30;
+						var cc = players[0].getCardsCount();
+						var ex = sx + cc*POS[0][2]+CH;
+						var ey = POS[0][1] + CH;
+						var cx = event.pageX - position.left;
+						var cy = event.pageY - position.top;
+						
+						if(cx>=sx && cx<=ex && cy>=sy && cy<=ey){
+							var index = Math.floor((cx-sx)/POS[0][2]);
+							if(index>=cc){
+								index = cc-1;
+							}
+							if(index>=0 && index<cc){
+								if(selectedCards[index]){
+									delete selectedCards[index];
+								}
+								else{
+									selectedCards[index]='1';
+								}
+								drawPlayerCards(0,selectedCards);
+								if(cb){
+									cb();
+								}
+							}
+						}
+					});
+				}
+			}
+			
+			function koudi(){
+				if(director.getBoss()==0){
+					updateKoudiBar();
+					$("#koudibtn").attr('disabled','disabled');
+					var cs = new cardSelector();
+					cs.handle(function(){
+						if(cs.getSelectedCount() == 8){
+							$("#koudibtn").removeAttr('disabled');
+						}
+						else{
+							$("#koudibtn").attr('disabled','disabled');
+						}
+					});
+					$("#koudibtn").unbind();
+					$("#koudibtn").click(function(event){
+						if(cs.getSelectedCount()== 8){
+							players[0].koudi(cs.getSelectedCards());
+							updateKoudiBar();
+							render();
+							play();
+						}
+					});
+				}
+				else{
+					players[director.getBoss()].koudi();
+					render();
+					play();
+				}
+			}
+			
+			function play(){
+				$("canvas").unbind();
+				if(!director.isGameover()){
+					var pid = director.getCurrentPlayer();
+					if(pid == 0){
+						updatePlayBar();
+						$("#playbtn").attr('disabled','disabled');
+						var cs = new cardSelector();
+						cs.handle(function(){
+							if(director.isLegalPlay(0,cs.getSelectedCards())){
+								$("#playbtn").removeAttr('disabled');
+							}
+							else{
+								$("#playbtn").attr('disabled','disabled');
+							}
+						});
+						$("#playbtn").unbind();
+						$("#playbtn").click(function(event){
+							var selectedCards = cs.getSelectedCards();
+							if(director.isLegalPlay(0,selectedCards)){
+								var result = [];
+								players[0].play(selectedCards);
+								render();
+								setTimeout(play,1000);
+							}
+						});
+					}
+					else{
+						players[pid].play();
+						render();
+						setTimeout(play,1000);
+					}
+				}
+				else{
+					drawDiCards();
+					setTimeout(function(){
+						var winner = director.endGame();
+						if(winner>0){
+							if(winner%2==0){
+								window.alert("你赢了!");
+							}
+							else{
+								window.alert("你输了!");
+							}
+						}
+						else{
+							newGame();
+						}
+					},3000);
+				}
+			}
+			
+			function resetAll(){
+				//reset stars
+				for(var i=0;i<stars.length;++i){
+					var j = Math.floor(Math.random()*stars.length);
+					if(i!=j){
+						var s = stars[i];
+						stars[i] = stars[j];
+						stars[j] = s;
+					}
+				}
+				director = new Director();
+				players = new Array(4);
+				canvas.clearRect(0,0,BW,BH);
+				for(var i=0;i<4;++i){
+					players[i]= new Player(i);
+				}
+				director.setPlayers(players);
+				newGame();
+			}
+			
+			var noMakeMaster = false;
+			function giveupMakeMaster(){
+				noMakeMaster = true;
+			}
+			
+			function newGame(){
+				director.newGame();
+				updateMasterBar();
+				updatePlayBar();
+				updateKoudiBar();
+				noMakeMaster = false;
+				var deal = function(){
+					if(director.deal()){
+						updateMasterBar();
+						for(var i=1;i<3;++i){
+							players[i].checkMakeMaster();
+						}
+						render();
+						setTimeout(deal,10);
+						return;
+					}
+					if(director.getMasterSuites(0).length>0 && !noMakeMaster){
+						setTimeout(deal,500);
+						return;
+					}
+					director.dealdi();
+					updateMasterBar();
+					render();
+					koudi();
+				};
+				deal();
+			}
+			
+			function showPrevTurn(){
+				if(director){
+					var t = director.getPreviousTurn();
+					if(t){
+						render(t);
+						setTimeout(render,3000);
+					}
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<input type="button" onclick="resetAll()" value="开始游戏"/> &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a><br/>
+		<div id="mastersbar" style="background:#696969;display:none;position:absolute">
+			<img class="suiteButton" src="res/h_d.jpg" id="suite_h" value="红桃" onclick="makeMaster('h')" disabled="disabled"/>
+			<img class="suiteButton" src="res/s_d.jpg" id="suite_s" value="黑桃" onclick="makeMaster('s')" disabled="disabled"/>
+			<img class="suiteButton" src="res/d_d.jpg" id="suite_d" value="方块" onclick="makeMaster('d')" disabled="disabled"/>
+			<img class="suiteButton" src="res/c_d.jpg" id="suite_c" value="梅花" onclick="makeMaster('c')" disabled="disabled"/>
+			<img class="suiteButton" src="res/j_d.jpg" id="suite_j" value="小鬼" onclick="makeMaster('j')" disabled="disabled"/>
+			<img class="suiteButton" src="res/jj_d.jpg" id="suite_J" value="大鬼" onclick="makeMaster('J')" disabled="disabled"/>
+			<img class="suiteButton" src="res/giveup.jpg" id="nommbtn" value="放弃" onclick="giveupMakeMaster()"/>
+		</div>
+		<div id="koudibar" style="background:white;display:none;position:absolute">
+			<input type="button" id="koudibtn" value="扣底" disabled="disabled"/>
+		</div>
+		<div id="playbar" style="background:white;display:none;position:absolute">
+			<input type="button" id="playbtn" value="出牌" disabled="disabled"/>
+			<input type="button" id="prevbtn" value="上一轮" onclick="showPrevTurn()"/>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,332 @@
+<html>
+	<head>
+		<title> Othello </title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/board.min.js"></script>
+		<script type="text/javascript" src="js/ai2.min.js"></script>
+		<style>
+			.button{
+				width:150px;
+				height: 30px;
+				font-size: 20px;
+				border: 1px solid #b3b3b3;
+				margin-top: 3%;
+				background: #ccc;
+			}
+		</style>
+		<script>
+			var bd = new Board();
+			var br = new Brain();
+			var CW = 60; //CELL WIDTH
+			var OS = 30; //OFFSET
+			var cellColor = "#000";
+			var highlightCellColor = "red";
+			var humanSide,computerSide;
+			var lastStep = [0,0];
+			
+			function logMsg(msg){
+				//$('#log').html(msg);
+			}
+			
+			function drawChess(cx,cy,player){
+				if(player == 0) return;
+				var size = CW*3/4;
+				$("canvas").drawEllipse({
+				  fillStyle: (player == BLACK?"black":"white"),
+				  x: (cx-0.5)*CW+OS, y:(cy-0.5)*CW+OS,
+				  width: size, height: size
+				});
+			}
+			
+			function drawBoard(){
+				$("canvas").drawRect({
+				  fillStyle: "darkgreen",
+				  x:OS, y:OS,
+				  width: CW*BS,
+				  height: CW*BS,
+				  fromCenter: false
+				});
+				
+				//draw lines
+				for(var x = 0; x <= BS; ++x){
+					$("canvas").drawLine({
+					  strokeStyle: cellColor,
+					  strokeWidth: 2,
+					  x1: x*CW+OS, y1: OS,
+					  x2: x*CW+OS, y2: BS*CW+OS
+					});
+				}
+				for(var y = 0; y <= BS; ++y){
+					$("canvas").drawLine({
+					  strokeStyle: cellColor,
+					  strokeWidth: 2,
+					  x1: OS, y1: y*CW+OS,
+					  x2: BS*CW+OS, y2: y*CW+OS
+					});
+				}
+				
+				for(var x = 1; x <= BS; ++x){
+					for(var y = 1; y <= BS; ++y){
+						drawChess(x,y,bd.getChess(x,y));
+					}
+				}
+				
+				//highlight the last chess
+				if(lastStep[0]>0 && lastStep[1]>0){
+					$("canvas").drawRect({
+					  fillStyle: "red",
+					  x: (lastStep[0]-0.5)*CW+OS, y:(lastStep[1]-0.5)*CW+OS,
+					  width: CW/8,
+					  height: CW/8,
+					  fromCenter: true
+					});
+				}
+				
+				//mark the putable chess
+				if(bd.getPlayer()==humanSide){
+					var steps = bd.getPutableList();
+					if(steps!=null && steps.length>0){
+						for(var i=0;i<steps.length;++i){
+							var step = steps[i];
+							$("canvas").drawRect({
+							  fillStyle: "orange",
+							  x: (step[0]-0.5)*CW+OS, y:(step[1]-0.5)*CW+OS,
+							  width: CW/8,
+							  height: CW/8,
+							  fromCenter: true
+							});
+						}
+					}
+				}
+				
+				//show scores
+				showScore();
+			}
+			
+			function drawCell(x,y,c){
+				$("canvas").drawLine({
+					  strokeStyle: c,
+					  strokeWidth: 2,
+					  x1: (x-1)*CW+OS, y1: (y-1)*CW+OS,
+					  x2: (x-1)*CW+OS, y2: y*CW+OS,
+					  x3: x*CW+OS, y3: y*CW+OS,
+					  x4: x*CW+OS, y4: (y-1)*CW+OS,
+					  x5: (x-1)*CW+OS, y5: (y-1)*CW+OS
+					});
+			}
+			
+			function showScore(){
+				var bw= bd.getChessCount();
+				$('#bnumber').html(bw[0]);
+				$('#wnumber').html(bw[1]);
+			}
+			
+			var lastCX=-1,lastCY=-1;
+			function highlightCell(cx,cy){
+				if(lastCX==cx && lastCY==cy){
+					return;
+				}
+				if(lastCX>=1 && lastCX<=BS && lastCX>=1 && lastCX<=BS){
+					drawCell(lastCX,lastCY,cellColor);
+				}
+				if(cx>=1 && cx<=BS && cy>=1 && cy<=BS){
+					drawCell(cx,cy,highlightCellColor);
+				}
+				lastCX=cx;
+				lastCY=cy;
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				for(var i=1;i<=BS;++i){
+					$("canvas").drawText({
+					  fillStyle: "orange",
+					  strokeStyle: "darkorange",
+					  strokeWidth: 1,
+					  x: OS/2, y: OS+(CW*(i-0.5)),
+					  font: "14pt Arial",
+					  text: i
+					});
+					$("canvas").drawText({
+					  fillStyle: "orange",
+					  strokeStyle: "darkorange",
+					  strokeWidth: 1,
+					  x: OS+(CW*(i-0.5)), y: OS/2,
+					  font: "14pt Arial",
+					  text: String.fromCharCode(64+i)
+					});
+					
+				}
+				
+				drawBoard();
+			});
+			
+			function newGame(){
+				var side = $("input[name='side']:checked").val();
+				if(side == "BLACK"){
+					humanSide = BLACK;
+					computerSide = WHITE;
+				}
+				else{
+					humanSide = WHITE;
+					computerSide = BLACK;
+				}
+				var level = $("input[name='level']:checked").val();
+				if(level=="0"){
+					br.setLevel(1,4);
+				}
+				else if(level=="1"){
+					br.setLevel(2,8);
+				}
+				else if(level=="2"){
+					br.setLevel(6,12);
+				}
+				else{
+					br.setLevel(8,18);
+				}
+				lastStep=[0,0];
+				bd.reset();
+				drawBoard();
+				turn();
+			}
+			
+			function regret(){
+				do{
+					bd.undo();
+					bd.undo();
+				}while(!bd.canPutAnyChess());
+				lastStep=[0,0];
+				drawBoard();
+				turn();
+			}
+			
+			function putChess(cx,cy){
+				if(cx>=1 && cx<=BS && cy>=1 && cy<=BS){
+					if(bd.canPutChess(cx,cy)){
+						var player = bd.getPlayer();
+						bd.putChess(cx,cy);
+						var side = (player==BLACK)?"Black":"White";
+						logMsg(side+" side put chess at ["+cx+","+cy+"]");
+						lastStep[0]=cx;lastStep[1]=cy;
+						drawBoard();
+						window.setTimeout(turn,100);
+					}
+					else{
+						logMsg("Illegal chess at "+cx+","+cy);
+					}
+				}
+			}
+			
+			function turn(){
+				$("canvas").unbind();
+				if(bd.isGameOver()){
+					var bw = bd.getChessCount();
+					var winSide = 0;
+					if(bw[0]>bw[1]){
+						winSide = BLACK;
+					}
+					else if(bw[0]<bw[1]){
+						winSide = WHITE;
+					}
+					if(winSide == humanSide){
+						window.alert("YOU WIN!");
+					}
+					else if(winSide == computerSide){
+						window.alert("YOU LOSE!");
+					}
+					else{
+						window.alert("DRAW!");
+					}
+					
+					logMsg("Game Over!");
+					return;
+				}
+				if(bd.canPutAnyChess()){
+					if(bd.getPlayer() == humanSide){
+						$("canvas").mousemove(function(event) {
+							var position = $("canvas").position();
+							var cx = Math.ceil((event.pageX - position.left - OS)/CW);
+							var cy = Math.ceil((event.pageY - position.top - OS)/CW);
+							if(cx>=1 && cx<=BS && cy>=1 && cy<=BS){
+								highlightCell(cx,cy);
+							}
+						});
+						$("canvas").click(function(event) {
+							var position = $("canvas").position();
+							var cx = Math.ceil((event.pageX - position.left - OS)/CW);
+							var cy = Math.ceil((event.pageY - position.top - OS)/CW);
+							putChess(cx,cy);
+						});
+					}
+					else if(bd.getPlayer() == computerSide){
+						var step = br.findBestStep(bd);
+						if(step!=null){
+							putChess(step[0],step[1]);
+						}
+					}
+				}
+				else{
+					bd.skipPutChess();
+					drawBoard();
+					turn();
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td valign="top">
+					<div style="height:540px;font-size:20px;font-family:Arial">
+						<div id="welcome">
+							<span style="font-size:40px;font-family:Arial;color:red">Othello<br/></span>
+							<span style="font-size:15px;font-family:Arial;text-align:right;">Author:<a href="http://weibo.com/yssss1980">@YIN SHAN</a></span>
+						</div>
+						
+						<hr/>
+						
+						<div id="opera">
+						<fieldset>	
+						<legend>Side</legend>
+						<input type="radio" name="side" value="BLACK" checked/> BLACK<br/>
+						<input type="radio" name="side" value="WHITE"/> WHITE <br/>
+						</fieldset>
+						<br/>
+						
+						<fieldset>
+						<legend>Difficulity</legend>
+						<input type="radio" name="level" value="0"/> IDIOT<br/>
+						<input type="radio" name="level" value="1"/> EASY<br/>
+						<input type="radio" name="level" value="2" checked/> NORMAL<br/>
+						<input type="radio" name="level" value="3"/> HARD <br/>
+						</fieldset>
+						<br/>
+						
+						<input class="button" type="button" onclick="newGame()" value="New Game"/>
+						<br/>
+						<input class="button" type="button" onclick="regret()" value="Regret"/>
+						</div>
+						<br/>
+						<div id="score" style="background:green;width:150px;" >
+							<table width="100%" style="text-align:center"><tr><td>
+							<span id="bnumber" style='color:black;font-size:40px'></span>
+							</td>
+							<td>
+							<span id="wnumber" style='color:white;font-size:40px'></span>
+							</td></tr>
+							</table>
+						</div>
+					</div>
+				</td>
+				<td>
+					<canvas id="bdcanvas" width="540" height="540" style="background-image:url('background.jpg')"></canvas>
+				</td>
+			</tr>
+		</table>
+		<a href="index_m.html"> Mobile Edition </a>
+	</body>
+</html>

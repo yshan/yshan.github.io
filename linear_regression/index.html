@@ -1,0 +1,304 @@
+<html>
+	<head>
+		<title>线性回归</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script type="text/javascript" src="js/regression.js"></script>
+		<script>
+		(function(){
+			var BW = 600; //board width
+			var BGCOLOR = "lightgray";
+			var ORG = [20,BW-20];
+			var points = [];
+			var model;
+			var iteration = 0;
+			var stopped = false;
+			
+			function drawAxis(){
+				var ox = ORG[0], oy = ORG[1];
+				//draw x axis
+				$("canvas").drawLine({
+					  strokeStyle:"black" ,
+					  strokeWidth: 2,
+					  x1: 0, y1: oy,
+					  x2: BW, y2: oy
+					});
+				$("canvas").drawLine({
+					  strokeStyle:"black" ,
+					  strokeWidth: 0,
+					  x1: BW-10, y1: oy-5,
+					  x2: BW, y2: oy,
+					  x3: BW-10, y3: oy+5
+					});
+				$("canvas").drawText({
+					  fillStyle: "black",
+					  strokeStyle: "black",
+					  strokeWidth: 1,
+					  x: BW-5, y:oy+10,
+					  font: "8pt Arial",
+					  text: "X"
+					});
+				
+					
+				//draw y axis
+				$("canvas").drawLine({
+					  strokeStyle:"black" ,
+					  strokeWidth: 0,
+					  x1: ox, y1: 0,
+					  x2: ox, y2: BW
+					});
+				$("canvas").drawLine({
+					  strokeStyle:"black" ,
+					  strokeWidth: 0,
+					  x1: ox-5, y1: 10,
+					  x2: ox, y2: 0,
+					  x3: ox+5, y3: 10
+					});
+				$("canvas").drawText({
+					  fillStyle: "black",
+					  strokeStyle: "black",
+					  strokeWidth: 1,
+					  x: ox-10, y:10,
+					  font: "8pt Arial",
+					  text: "Y"
+					});
+				
+				//draw org
+				$("canvas").drawText({
+					  fillStyle: "black",
+					  strokeStyle: "black",
+					  strokeWidth: 1,
+					  x: ox-10, y:oy+10,
+					  font: "8pt Arial",
+					  text: "O"
+					});
+			}
+			
+			function drawModel(){
+				var result = [];
+				for(var x=0;x<=BW-ORG[0];x+=5){
+					var y = model(x);
+					result.push([x,y]);
+				}
+				var obj = {
+				  strokeStyle: "blue",
+				  strokeWidth: 5,
+				  rounded: true
+				};
+				for(var i=0;i<result.length;++i){
+					var r = result[i];
+					obj['x'+(i+1)] = ORG[0]+r[0];
+					obj['y'+(i+1)] = ORG[1]-r[1];
+				}
+				$("canvas").drawLine(obj);
+				if(iteration>0){
+					$("canvas").drawText({
+					  fillStyle: "red",
+					  strokeStyle: "red",
+					  strokeWidth: 1,
+					  x: BW-150, y:20,
+					  font: "16pt Arial",
+					  text: "Current iteration:"+iteration
+					});
+				}
+			}
+			
+			function drawPoint(x,y,color){
+				var cx = x+ORG[0];
+				var cy = ORG[1]-y;
+				if(!color){
+					color = "red";
+				}
+				$("canvas").drawLine({
+					  strokeStyle:color ,
+					  strokeWidth: 1,
+					  x1: cx-5, y1: cy-5,
+					  x2: cx+5, y2: cy+5
+				});
+				$("canvas").drawLine({
+					  strokeStyle:color ,
+					  strokeWidth: 1,
+					  x1: cx+5, y1: cy-5,
+					  x2: cx-5, y2: cy+5
+				});
+			}
+			
+			function render(){
+				$("canvas").drawRect({
+				  fillStyle: BGCOLOR,
+				  x: 0, y: 0,
+				  width: BW,
+				  height: BW,
+				  fromCenter: false
+				});
+				
+				drawAxis();
+				
+				for(var i=0;i<points.length;++i){
+					var p = points[i];
+					drawPoint(p[0],p[1]);
+				}
+				
+				if(model){
+					drawModel();
+				}
+			}
+			
+			function reset(){
+				points = [];
+				model = null;
+				render();
+			}
+			
+			function GD(){
+				var m = parseInt($("#modelSel").val());
+				var reg = new GDRegression(m);
+				var MAX_ITER = 50000;
+				var MIN_LOSS = 1e-5
+				stopped = false;
+				var lastloss = 0;
+				var loss = 0;
+				var failed = false;
+				triggerEvent(false);
+				var t = function(){
+					while(iteration++<MAX_ITER && !stopped){
+						loss = reg.trainExamples(points);
+						if(Math.abs(loss-lastloss)<MIN_LOSS){
+							break;
+						}
+						if(lastloss!=0 && loss>=lastloss+10){
+							failed = true;
+							break;
+						}
+						lastloss = loss;
+						if(iteration%100==0){
+							console.log("theta:"+reg.getTheta()+",loss:"+loss);
+							model = reg.getModel();
+							render();
+							setTimeout(t,100);
+							return;
+						}
+					}
+					if(!failed){
+						console.log("final theta:"+reg.getTheta()+",loss:"+loss);
+						model = reg.getModel();
+						render();
+						window.alert("训练完成");
+					}
+					else{
+						window.alert("训练失败");
+					}
+					triggerEvent(true);
+				};
+				t();
+			}
+			
+			function NE(){
+				var m = parseInt($("#modelSel").val());
+				var reg = new NERegression(m);
+				reg.trainExamples(points);
+				model = reg.getModel();
+				render();
+			}
+			
+			function training(){
+				if(points.length<2){
+					return;
+				}
+				iteration = 0;
+				var algor = $('#algorSel').val();
+				if(algor=="GD"){
+					GD();
+				}
+				else{
+					NE();
+				}
+			}
+			
+			function triggerEvent(enabled){
+				$("canvas").unbind();
+				$("#clearBtn").unbind();
+				$("#trainingBtn").unbind();
+				$("#stopBtn").unbind();
+				
+				if(enabled){
+					$("canvas").bind("contextmenu",function(e){
+						return false;
+					});
+					$("canvas").mousedown(function(event) {
+						var position = $("canvas").position();
+						var cx = event.pageX - position.left;
+						var cy = event.pageY - position.top;
+						var x = cx - ORG[0];
+						var y = ORG[1] - cy;
+						if(event.which==1){
+							if(x>0 && y>0){
+								points.push([x,y]);
+								drawPoint(x,y);
+							}
+						}
+						else if(event.which==3){
+							for(var i=0;i<100;++i){
+								var xx = x + Math.floor(Math.random()*100-50);
+								var yy = y + Math.floor(Math.random()*100-50);
+								if(xx>0 && yy>0 && xx<BW-20 && yy<BW-20){
+									points.push([xx,yy]);
+									drawPoint(xx,yy);
+								}
+							}
+						}
+					});
+					$("#clearBtn").removeAttr('disabled');
+					$("#clearBtn").click(reset);
+					$("#trainingBtn").removeAttr('disabled');
+					$("#trainingBtn").click(training);
+					$("#stopBtn").attr('disabled','disabled');
+				}
+				else{
+					$("#clearBtn").attr('disabled','disabled');
+					$("#trainingBtn").attr('disabled','disabled');
+					$("#stopBtn").removeAttr('disabled');
+					$("#stopBtn").click(function(){
+						stopped = true;
+					});
+				}
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				//create canvas
+				var cv = document.createElement('canvas');
+				cv.width = BW;
+				cv.height = BW;
+				cv.style.background = BGCOLOR;
+				document.body.appendChild(cv);
+				reset();
+				triggerEvent(true);
+			});
+		})();	
+		</script>
+	</head>
+	<body>
+		模型：
+		<select id="modelSel">
+			<option value="1">一次</option>
+			<option value="2">二次</option>
+			<option value="3">三次</option>
+		</select>
+		算法：
+		<select id="algorSel">
+			<option value="GD">Gradient Descent</option>
+			<option value="NE">Normal Equations</option>
+		</select>
+		<input type="button" value="清除" id="clearBtn"/>
+		<input type="button" value="训练" id="trainingBtn"/>
+		<input type="button" value="停止训练" id="stopBtn"/>
+		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+		<br/>
+	</body>
+</html>

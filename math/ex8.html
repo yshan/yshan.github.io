@@ -1,0 +1,84 @@
+<html>
+	<head>
+		<title>LU分解</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function luJs(A) {
+				var L = Matrix.I(A.rows());
+				var U = Matrix.Zero(A.rows(), A.cols());
+				var p = 1;
+
+				for (var k = 1; k <= Math.min(A.cols(), A.rows()); k++) {
+					for (var i = k + 1; i <= A.rows(); i++) {
+						var l = A.e(i, p) / A.e(k, p);
+						L.elements[i - 1][k - 1] = l;
+
+						for (var j = k + 1; j <= A.cols(); j++) {
+							A.elements[i - 1][j - 1] -= A.e(k, j) * l;
+						}
+					}
+
+					for (var j = k; j <= A.cols(); j++) {
+						U.elements[k - 1][j - 1] = A.e(k, j);
+					}
+
+					if (p < A.cols())
+						p++;
+				}
+
+				return {
+					L: L,
+					U: U,
+				};
+			}
+			
+			function outputM(A){
+				var s ="";
+				for(var i = 1;i<=A.rows();++i){
+					for(var j = 1;j<=A.cols();++j){
+						s += A.e(i,j)+"  ";
+					}
+					s+="<br/>"
+				}
+				return s;
+			}
+			
+			function outputV(V){
+				var s ="";
+				for(var i = 1;i<=V.dimensions();++i){
+					s += V.e(i)+",";
+				}
+				return s;
+			}
+		
+			function calc(){
+				var A = $M(eval($('#_A').val()));
+				var B = $V(eval($('#_B').val()));
+				var lu = luJs(A.dup());
+				var l = lu.L;
+				var u = lu.U;
+				var s ="分解A的结果为：<br/>";
+				s += "L:<br/>"+outputM(l)+"<br/><br/>";
+				s += "U:<br/>"+outputM(u)+"<br/><br/>";
+				
+				var y = l.inv().x(B);
+				s += "由Ly=B，得到y="+outputV(y)+"<br/>";
+				var x = u.inv().x(y);
+				s += "由Ux=y，得到x="+outputV(x)+"<br/>";
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		LU分解： AX=B<br/>
+		A=<textarea cols="40" rows="5" id="_A">[[1,2,3],[2,5,2],[3,1,5]]</textarea>
+		<br/>
+		B=<textarea cols="40" rows="5" id="_B">[14,18,20]</textarea>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

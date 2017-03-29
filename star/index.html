@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<title>星空</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script>
+		var BW = 800; //canvas width
+		var BH = 600; //canvas height
+		var MAX_STAR_SIZE = 20;
+		var MAX_STAR_SPEED = 10;
+		var STAR_COUNT = 50;
+		var BGCOLOR = "black";
+		var ctx;
+		var stars = [];
+		
+		function rndf(n){
+			return Math.floor(Math.random()*n);
+		}
+		
+		function rndc(n){
+			return Math.ceil(Math.random()*n);
+		}
+		
+		function Star(){
+			this.reset = function(){
+				this.x = 0;
+				this.y = rndf(BH);
+				this.size = rndc(MAX_STAR_SIZE);
+				this.vx = MAX_STAR_SPEED*this.size/MAX_STAR_SIZE;
+				this.vy = 0;
+				this.color = "rgba("+rndf(255)+", "+rndf(255)+", "+rndf(255)+", 0.5)";
+			};
+			
+			this.reset();
+			this.x = rndf(BW);
+		}
+		
+		function render(){
+			ctx.globalCompositeOperation = "source-over";
+			ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+			ctx.fillRect(0, 0, BW, BH);
+			ctx.globalCompositeOperation = "lighter";
+			for(var i = 0; i < STAR_COUNT; ++i){
+				var p = stars[i];
+				
+				ctx.beginPath();
+				var gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+				gradient.addColorStop(0, "white");
+				gradient.addColorStop(0.4, "white");
+				gradient.addColorStop(0.4, p.color);
+				gradient.addColorStop(1, "black");
+				ctx.fillStyle = gradient;
+				ctx.arc(p.x, p.y, p.size, Math.PI*2, false);
+				ctx.fill();
+				
+				p.x += p.vx;
+				p.y += p.vy;
+				
+				if(p.x<=0 || p.x>=BW || p.y<=0 || p.y>=BH){
+					p.reset();
+				}
+			}
+		}
+		
+		function init(){
+			if (!window.console){
+				console = {log:function(){},debug:function(){}};
+			}
+			//create canvas
+			var cv = document.createElement('canvas');
+			cv.width = BW;
+			cv.height = BH;
+			cv.style.background = BGCOLOR;
+			document.body.appendChild(cv);
+			ctx = cv.getContext("2d");
+			
+			//create all stars
+			for(var i=0;i<STAR_COUNT;++i){
+				var s = new Star();
+				stars.push(s);
+			}
+			updateInfo();
+			
+			setInterval(render, 33);
+		};
+
+		function changeSize(d){
+			MAX_STAR_SIZE += d;
+			if(MAX_STAR_SIZE<=1) MAX_STAR_SIZE=1;
+			if(MAX_STAR_SIZE>=100) MAX_STAR_SIZE=100;
+			updateInfo();
+		}
+
+		function changeSpeed(d){
+			MAX_STAR_SPEED += d;
+			if(MAX_STAR_SPEED<=1) MAX_STAR_SPEED=1;
+			if(MAX_STAR_SPEED>=100) MAX_STAR_SPEED=100;
+			updateInfo();
+		}
+		
+		function updateInfo(){
+			var infoSpan = document.getElementById("info");
+			infoSpan.innerHTML= ("Size:"+MAX_STAR_SIZE+",Speed:"+MAX_STAR_SPEED);
+		}
+		
+		</script>
+	</head>
+	<body onload="init()">
+		<input type="button" value="增大" onclick="changeSize(1)"/>
+		<input type="button" value="减小" onclick="changeSize(-1)"/>
+		<input type="button" value="提速" onclick="changeSpeed(1)"/>
+		<input type="button" value="减速" onclick="changeSpeed(-1)"/>
+		<span id="info"></span>
+		<br/>
+	</body>
+</html>

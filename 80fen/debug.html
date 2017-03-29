@@ -1,0 +1,388 @@
+<html>
+	<head>
+		<title> 80分（拖拉机） </title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/poker.min.js"></script>
+		<script type="text/javascript" src="js/director.js"></script>
+		<script type="text/javascript" src="js/player.js"></script>
+		<script>
+			var OS = 10; 
+			var CH = 100; //card height
+			var BW = 900; //board width
+			var BH = 800; //board height
+			var CI = 20;
+			var POS =[[OS,BH-CH,CI,0],[OS,BH-3*CH,CI,0],[OS,BH-4.5*CH,CI,0],[OS,BH-6*CH,CI,0],[OS,BH-7.5*CH,CH*0.8,0]];
+			var director;
+			var players;
+			var canvas;
+			
+			function drawPokerCard(sx,sy,c){
+				var v = val(c);
+				if(v[1]=='O'){
+					v[0]=(v[0]=='j'?'s':'h');
+				}
+				canvas.drawPokerCard(sx,sy,CH,v[0],v[1]);
+			}
+			
+			function drawPlayerCards(p,selectedCards){
+				var player = players[p];
+				var cards = player.getCards();
+				var pos = POS[p];
+				var sx = pos[0] , sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				var offset = 30;
+				if(selectedCards){
+					canvas.clearRect(sx,sy-offset,dx*cards.length+CH,CH+offset);
+				}
+				for(var j=0;j<cards.length;++j){
+					var y = sy;
+					if(selectedCards && selectedCards[j]){
+						y -= offset;
+					}
+					drawPokerCard(sx,y,cards[j]);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawTurnCards(p,cards){
+				var pos = POS[p];
+				var sx = BW-cards.length*CI-CH , sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				for(var j=0;j<cards.length;++j){
+					drawPokerCard(sx,sy,cards[j]);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawPreviousTurnCards(p,cards){
+				var pos = POS[p];
+				var cc = players[p].getCards();
+				var sx = pos[0]+(cc.length-1)*CI+CH, sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				for(var j=0;j<cards.length;++j){
+					drawPokerCard(sx,sy,cards[j]);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function drawDiCards(){
+				var pos = POS[4];
+				var sx = pos[0] , sy=pos[1];
+				var dx = pos[2] , dy=pos[3];
+				var cards = director.getDiCards();
+				for(var i=0;i<cards.length;++i){
+					var c = cards[i];
+					drawPokerCard(sx,sy,c);
+					sx += dx; sy += dy;
+				}
+			}
+			
+			function render(){
+				canvas.clearRect(0,0,BW,BH);
+				if(director && director.getStatus()>0){
+					for(var i=0;i<4;++i){
+						drawPlayerCards(i);
+					}
+					
+					drawDiCards();
+					//show game information
+					var boss = director.getBoss();
+					var score = director.getCurrentScore();
+					var point = director.getPoints();
+					var suite = director.getMasterSuite();
+					var msg ="庄家:"+LOC_MSG[boss]+"\n比分："+point[0]+":"+point[1]+"\n得分:"+score+"\n主："+SUITES_MSG[suite];
+					if(director.getStatus()==STATUS.PLAY){
+						var turn = director.getCurrentTurn();
+						if(turn){
+							for(var i=0;i<turn.cards.length;++i){
+								drawTurnCards((turn.leader+i)%4,turn.cards[i]);
+							}
+						}
+						turn = director.getPreviousTurn();
+						if(turn){
+							for(var i=0;i<turn.cards.length;++i){
+								drawPreviousTurnCards((turn.leader+i)%4,turn.cards[i]);
+							}
+						}
+					}
+					$("canvas").drawText({
+					  fillStyle: "orange",
+					  strokeStyle: "darkorange",
+					  strokeWidth: 1,
+					  x: BW-200, y: OS,
+					  font: "14pt Arial",
+					  text: msg
+					});
+				}
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				//create canvas
+				var cv = document.createElement('canvas');
+				cv.width = BW;
+				cv.height = BH;
+				cv.style.background = "darkgreen";
+				document.body.appendChild(cv);
+				canvas = cv.getContext('2d');
+				
+				//adjust the divs position
+				var w = $('#mastersbar').width();
+				$('#mastersbar').offset({top:BH-CH-20,left:BW/2-w/2});
+				w = $('#koudibar').width();
+				$('#koudibar').offset({top:BH-CH-20,left:BW/2-w/2});
+				w = $('#playbar').width();
+				$('#playbar').offset({top:BH-CH-20,left:BW/2-w/2});
+				render();
+			});
+			
+			function updateMasterBar(){
+				if(director.getStatus()!=STATUS.DEAL){
+					$('#mastersbar').hide();
+					return;
+				}
+				$('#mastersbar').show();
+				
+				var result = director.getMasterSuites(0);
+				for(var i=0;i<SUITES.length;++i){
+					var sid = "#suite_"+SUITES[i];
+					$(sid).attr('disabled','disabled');
+				}
+				for(var i=0;i<result.length;++i){
+					var s = result[i];
+					var sid = "#suite_"+s;
+					$(sid).removeAttr('disabled');
+				}
+			}
+			
+			function updateKoudiBar(){
+				if(director.getStatus()!=STATUS.KOUDI){
+					$('#koudibar').hide();
+					return;
+				}
+				$('#koudibar').show();
+			}
+			
+			function updatePlayBar(){
+				if(director.getStatus()!=STATUS.PLAY){
+					$('#playbar').hide();
+					return;
+				}
+				$('#playbar').show();
+			}
+			
+			function makeMaster(suite){
+				director.makeMaster(0,suite);
+				updateMasterBar();
+			}
+			
+			function cardSelector(){
+				var selectedCards = {};
+				
+				this.getSelectedCount = function(){
+					var count = 0;
+					for(var c in selectedCards){
+						++count;
+					}
+					return count;
+				}
+				
+				this.getSelectedCards = function(){
+					var result = [];
+					var cards = players[0].getCards();
+					for(var c in selectedCards){
+						result.push(cards[c]);
+					}
+					return result;
+				}
+				
+				this.handle = function(cb){
+					$("canvas").unbind();
+					$("canvas").click(function(event){
+						var position = $("canvas").position();
+						var sx = POS[0][0];
+						var sy = POS[0][1]-30;
+						var cc = players[0].getCardsCount();
+						var ex = sx + cc*POS[0][2]+CH;
+						var ey = POS[0][1] + CH;
+						var cx = event.pageX - position.left;
+						var cy = event.pageY - position.top;
+						
+						if(cx>=sx && cx<=ex && cy>=sy && cy<=ey){
+							var index = Math.floor((cx-sx)/POS[0][2]);
+							if(index>=cc){
+								index = cc-1;
+							}
+							if(index>=0 && index<cc){
+								if(selectedCards[index]){
+									delete selectedCards[index];
+								}
+								else{
+									selectedCards[index]='1';
+								}
+								drawPlayerCards(0,selectedCards);
+								if(cb){
+									cb();
+								}
+							}
+						}
+					});
+				}
+			}
+			
+			function koudi(){
+				if(director.getBoss()==0){
+					updateKoudiBar();
+					$("#koudibtn").attr('disabled','disabled');
+					var cs = new cardSelector();
+					cs.handle(function(){
+						if(cs.getSelectedCount() == 8){
+							$("#koudibtn").removeAttr('disabled');
+						}
+						else{
+							$("#koudibtn").attr('disabled','disabled');
+						}
+					});
+					$("#koudibtn").unbind();
+					$("#koudibtn").click(function(event){
+						if(cs.getSelectedCount()== 8){
+							players[0].koudi(cs.getSelectedCards());
+							updateKoudiBar();
+							render();
+							play();
+						}
+					});
+				}
+				else{
+					players[director.getBoss()].koudi();
+					render();
+					play();
+				}
+			}
+			
+			function play(){
+				$("canvas").unbind();
+				if(!director.isGameover()){
+					var pid = director.getCurrentPlayer();
+					if(pid == 0){
+						updatePlayBar();
+						$("#playbtn").attr('disabled','disabled');
+						var cs = new cardSelector();
+						cs.handle(function(){
+							if(director.isLegalPlay(0,cs.getSelectedCards())){
+								$("#playbtn").removeAttr('disabled');
+							}
+							else{
+								$("#playbtn").attr('disabled','disabled');
+							}
+						});
+						$("#playbtn").unbind();
+						$("#playbtn").click(function(event){
+							var selectedCards = cs.getSelectedCards();
+							if(director.isLegalPlay(0,selectedCards)){
+								var result = [];
+								players[0].play(selectedCards);
+								render();
+								setTimeout(play,100);
+							}
+						});
+					}
+					else{
+						players[pid].play();
+						render();
+						setTimeout(play,100);
+					}
+				}
+				else{
+					var winner = director.endGame();
+					if(winner>0){
+						if(winner%2==0){
+							window.alert("你赢了!");
+						}
+						else{
+							window.alert("你输了!");
+						}
+					}
+					else{
+						newGame();
+					}
+				}
+			}
+			
+			function resetAll(){
+				director = new Director();
+				players = new Array(4);
+				canvas.clearRect(0,0,BW,BH);
+				for(var i=0;i<4;++i){
+					players[i]= new Player(i);
+				}
+				director.setPlayers(players);
+				newGame();
+			}
+			
+			function newGame(){
+				director.newGame();
+				updateMasterBar();
+				updatePlayBar();
+				updateKoudiBar();
+				var seconds = 10;
+				var deal = function(){
+					if(director.deal()){
+						updateMasterBar();
+						for(var i=1;i<3;++i){
+							players[i].checkMakeMaster();
+						}
+						render();
+						setTimeout(deal,10);
+						return;
+					}
+					if(--seconds>=0 && director.getMasterSuites(0).length>0){
+						setTimeout(deal,1000);
+						return;
+					}
+					director.dealdi();
+					updateMasterBar();
+					render();
+					koudi();
+				};
+				deal();
+			}
+			
+			function undoTurn(){
+				$('#playbtn').attr('disabled','disabled');
+				$("#continuebtn").removeAttr('disabled');
+				director.undoTurn();
+				render();
+			}
+			
+			function continuePlay(){
+				$("#continuebtn").attr('disabled','disabled');
+				play();
+			}
+		</script>
+	</head>
+	<body>
+		<input type="button" onclick="resetAll()" value="开始游戏"/> <br/>
+		<div id="mastersbar" style="background:white;display:none;position:absolute">
+			<input type="button" id="suite_h" value="红桃" onclick="makeMaster('h')" disabled="disabled"/>
+			<input type="button" id="suite_s" value="黑桃" onclick="makeMaster('s')" disabled="disabled"/>
+			<input type="button" id="suite_d" value="方块" onclick="makeMaster('d')" disabled="disabled"/>
+			<input type="button" id="suite_c" value="梅花" onclick="makeMaster('c')" disabled="disabled"/>
+			<input type="button" id="suite_j" value="小鬼" onclick="makeMaster('j')" disabled="disabled"/>
+			<input type="button" id="suite_J" value="大鬼" onclick="makeMaster('J')" disabled="disabled"/>
+		</div>
+		<div id="koudibar" style="background:white;display:none;position:absolute">
+			<input type="button" id="koudibtn" value="扣底" disabled="disabled"/>
+		</div>
+		<div id="playbar" style="background:white;display:none;position:absolute">
+			<input type="button" id="playbtn" value="出牌" disabled="disabled"/>
+			<input type="button" id="undobtn" value="Undo" onclick="undoTurn()"/>
+			<input type="button" id="continuebtn" value="Continue" onclick="continuePlay()" disabled="disabled"/>
+		</div>
+	</body>
+</html>

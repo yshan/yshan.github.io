@@ -1,0 +1,50 @@
+<html>
+	<head>
+		<title>数值积分</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc(){
+				var x0 = $('#_X0').val()*1.0;
+				var x1 = $('#_X1').val()*1.0;
+				var n = $('#_N').val()*1;
+				var h = (x1-x0)/n;
+				var s ="复化梯形公式，h="+h+"</br>";
+				var f;
+				eval("f=function(x){return ("+$('#_F').val()+");}");
+				
+				var xx = x0;
+				var sum = 0;
+				for(var i=0;i<n-1;++i){
+					xx += h;
+					sum += f(xx);
+				}
+				var t = h/2*(f(x0)+2*sum+f(x1));
+				s += "T<sub>"+n+"</sub>=h/2*(f(x0)+2*sum+f(x1))="+t+"<br/>";
+				
+				var sum2 = 0;
+				xx = x0+h/2;
+				for(var i=0;i<n;++i){
+					sum2 += f(xx);
+					xx += h;
+				}
+				var v = h/6*(f(x0)+2*sum+4*sum2+f(x1));
+				s +="复化Simpson公式，h="+h+"</br>";
+				s += "S<sub>"+n+"</sub>=h/6*(f(x0)+2*sum+4*sum2+f(x1))="+v+"<br/>";
+				$('#result').html(s);
+			}	
+		</script>
+	</head>
+	<body onload="calc()">
+		目标函数：<input type="text" id="_F" value="x/(4+x*x)"/><br/>
+		起始值：<input type="text" id="_X0" value="0"/><br/>
+		结束值：<input type="text" id="_X1" value="1"/><br/>
+		分段(n):<input type="text" id="_N" value="8"/><br/>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<br/><br/>
+		<div id="result"></div>
+	</body>
+</html>

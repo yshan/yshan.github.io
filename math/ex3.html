@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>线程方程组求解</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc(){
+				var A = $M(eval($('#_A').val()));
+				var B = $V(eval($('#_B').val()));
+				var X = A.inv().multiply(B);
+				var s ="结果为：<br/>";
+				for(var i=1;i<=X.dimensions();++i){
+					s += X.e(i)+"<br/>";
+				}
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		线程方程组求解： AX=B<br/>
+		A=<textarea cols="40" rows="5" id="_A">[[1,0,0],[0,1,0],[0,0,1]]</textarea>
+		<br/>
+		B=<textarea cols="40" rows="5" id="_B">[2,3,4]</textarea>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

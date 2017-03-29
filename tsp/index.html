@@ -1,0 +1,201 @@
+<html>
+	<head>
+		<title>TSP</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="js/tsp.js"></script>
+		<script>
+		(function(){
+			var BW = 600; //board width
+			var BGCOLOR = "lightgray";
+			var cities = [];
+			var iteration = 0;
+			var MAX_ITER = 10000;
+			var stopped = false;
+			
+			function drawCity(cx,cy,color){
+				var size = 8;
+				if(!color){
+					color = "red";
+				}
+				$("canvas").drawEllipse({
+				  fillStyle: color,
+				  x: cx, y:cy,
+				  width: size, height: size
+				});
+			}
+			
+			function drawPath(path){
+				var obj = {
+				  strokeStyle: "blue",
+				  strokeWidth: 3,
+				  rounded: true
+				};
+				for(var i=0,l=path.length;i<l;++i){
+					var p = path[i];
+					var city = cities[p];
+					obj['x'+(i+1)] = city[0];
+					obj['y'+(i+1)] = city[1];
+				}
+				var last = path.length+1;
+				var c = cities[path[0]];
+				obj['x'+last]=c[0];
+				obj['y'+last]=c[1];
+				$("canvas").drawLine(obj);
+			}
+			
+			function render(sol){
+				$("canvas").drawRect({
+				  fillStyle: BGCOLOR,
+				  x: 0, y: 0,
+				  width: BW,
+				  height: BW,
+				  fromCenter: false
+				});
+				
+				for(var i=0;i<cities.length;++i){
+					var p = cities[i];
+					drawCity(p[0],p[1]);
+				}
+				
+				if(sol){
+					drawPath(sol.path);
+					if(iteration>0){
+						$("canvas").drawText({
+						  fillStyle: "red",
+						  strokeStyle: "red",
+						  strokeWidth: 1,
+						  x: BW-180, y:20,
+						  font: "16pt Arial",
+						  text: "Current iteration:"+iteration+",Cost:"+Math.floor(sol.cost)
+						});
+					}
+				}
+			}
+			
+			function reset(){
+				cities = [];
+				render();
+			}
+			
+			function start(){
+				if(cities.length<=2){
+					return;
+				}
+				iteration = 0;
+				stopped = false;
+				triggerEvent(false);
+				var algor = $('#algorSel').val();
+				var finder;
+				eval('finder= new '+algor+'()');
+				finder.setCities(cities);
+				var tick = (new Date()).getTime();
+				var bestSol={cost:999999};
+				var f = function(){
+					if(iteration++<MAX_ITER && !stopped){
+						var sol = finder.findPath();
+						render(sol);
+						if(bestSol.cost>sol.cost){
+							bestSol = sol;
+						}
+						if(!sol.found){
+							setTimeout(f,0);
+							return;
+						}
+					}
+					tick = (new Date()).getTime()-tick;
+					render(bestSol);
+					window.alert("搜索完成，最优路径长度："+Math.floor(bestSol.cost)+",共花费："+tick+"ms");
+					triggerEvent(true);
+				};
+				
+				f();
+			}
+			
+			function triggerEvent(enabled){
+				$("canvas").unbind();
+				$("#clearBtn").unbind();
+				$("#startBtn").unbind();
+				$("#stopBtn").unbind();
+				
+				if(enabled){
+					$("canvas").bind("contextmenu",function(e){
+						return false;
+					});
+					$("canvas").mousedown(function(event) {
+						var position = $("canvas").position();
+						var cx = event.pageX - position.left;
+						var cy = event.pageY - position.top;
+						if(cx>=0 && cy>=0){
+							cities.push([cx,cy]);
+							drawCity(cx,cy);
+						}
+					});
+					$("#clearBtn").removeAttr('disabled');
+					$("#clearBtn").click(reset);
+					$("#startBtn").removeAttr('disabled');
+					$("#startBtn").click(start);
+					$("#stopBtn").attr('disabled','disabled');
+				}
+				else{
+					$("#clearBtn").attr('disabled','disabled');
+					$("#startBtn").attr('disabled','disabled');
+					$("#stopBtn").removeAttr('disabled');
+					$("#stopBtn").click(function(){
+						stopped = true;
+					});
+				}
+			}
+			
+			$(function(){
+				if (!window.console){
+					console = {log:function(){},debug:function(){}};
+				}
+				//create canvas
+				var cv = document.createElement('canvas');
+				cv.width = BW;
+				cv.height = BW;
+				cv.style.background = BGCOLOR;
+				$('#opera').after(cv);
+				reset();
+				var os = 100;
+				var cx = BW/2;
+				var cy = BW/2;
+				var r = BW/3;
+				for(var i=0;i<20;++i){
+					var degree = Math.random()*2*Math.PI;
+					var x = cx + Math.floor(r*Math.cos(degree));
+					var y = cy + Math.floor(r*Math.sin(degree));
+					cities.push([x,y]);
+				}
+				render();
+				triggerEvent(true);
+			});
+		})();	
+		</script>
+	</head>
+	<body>
+		<div id="opera">
+		算法：
+		<select id="algorSel">
+			<option value="SA">模拟退火(SA)</option>
+			<option value="GA">遗传算法(GA)</option>
+			<option value="ACO">蚁群优化(ACO)</option>
+			<option value="PSO">粒子群(PSO)</option>
+		</select>
+		<input type="button" value="清除" id="clearBtn"/>
+		<input type="button" value="开始搜索" id="startBtn"/>
+		<input type="button" value="停止搜索" id="stopBtn"/>
+		&nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+		</div>
+		<div id="desc" style="font:8pt;color:green;">
+		操作说明:点击鼠标设置城市
+		</div>
+		<div id="tspexplain" style="font-size:12px;width:600px;background-color:lightyellow">
+		旅行商问题，即TSP问题（Travelling Salesman Problem）。
+		<br/>	假设有一个旅行商人要拜访n个城市，他必须选择所要走的路径，路径的限制是每个城市只能拜访一次，而且最后要回到原来出发的城市。路径的选择目标是要求得的路径路程为所有路径之中的最小值。
+		</div>
+	</body>
+</html>

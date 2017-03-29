@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>一元二次方程求根</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc2(){
+				var a = $('#_A').val()*1.0;
+				var b = $('#_B').val()*1.0;
+				var c = $('#_C').val()*1.0;
+				
+				var delta = b*b-4*a*c;
+				var s = "";
+				if(delta < 0){
+					 s= "无实根";
+				}
+				else{
+					var d = Math.sqrt(delta);
+					var x1 = (-b+d)/(2*a);
+					var x2 = (-b-d)/(2*a);
+					s = "x1="+x1+",x2="+x2;
+				}
+				$('#result').html(s);
+			}	
+		</script>
+	</head>
+	<body>
+		<input type="text" id="_A" value="1"/>x<sup>2</sup>
+		+<input type="text" id="_B" value="2"/>x
+		+<input type="text" id="_C" value="1"/> = 0;
+		<br/>
+		<input type="button" onclick="calc2()" value="求根"/>
+		<br/><br/>
+		<div id="result"></div>
+	</body>
+</html>

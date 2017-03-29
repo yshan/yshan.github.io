@@ -1,0 +1,127 @@
+<html>
+	<head>
+		<title>隧道</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script>
+		var BW = 512; //canvas width
+		var BH = 512; //canvas height
+		var TW = 256; //texture width
+		var TH = 256; //texture height
+		var ctx;
+		var imageData;
+		var texture;
+		var angleTable;
+		var distanceTable;
+		var animation = 0;
+		
+		function render(){
+			animation += 0.01;
+			var shiftX = (TW * 1.0 * animation)>>0;
+			var shiftY = (TH * 0.25 * animation)>>0;        
+			
+			//build imageData
+			var data = imageData.data;
+			var pos = 0 ;
+			for(var y=0;y<BH;++y){
+				for(var x=0;x<BW;++x){
+					var c = texture[(distanceTable[x][y] + shiftX)  % TW][(angleTable[x][y] + shiftY) % TH];
+					data[pos++] = c[0];
+					data[pos++] = c[1];
+					data[pos++] = c[2];
+					data[pos++] = 255;
+				}
+			}
+			ctx.putImageData(imageData,0,0);
+		}
+		
+		function initArray(x,y,value){
+			var result = new Array(x);
+			for(var i=0;i<x;++i){
+				var r = result[i] = new Array(y);
+				for(var j = 0;j<y;++j){
+					r[j] = value;
+				}
+			}
+			return result;
+		}
+		
+		function selectTexture(sId){
+			var alltx = document.getElementsByTagName("img");
+			var tx ;
+			for (var i = 0; i < alltx.length; i++){
+				var im = alltx[i];
+				if (im.id == sId){
+					tx = im;
+					im.style.border = '3px solid #FF6600';
+				}else{
+					im.style.border = '1px solid #008800';
+				}
+			}
+
+			ctx.drawImage(tx,0,0);
+			var image = ctx.getImageData(0,0,TW,TH);
+			var data = image.data;
+			var pos =0;
+			for(var y=0;y<TH;++y){
+				for(var x=0;x<TW;++x){
+					var r = data[pos++];
+					var g = data[pos++];
+					var b = data[pos++];
+					pos++;
+					texture[x][y] = [r,g,b];
+				}
+			}
+		}
+		
+		function init(){
+			if (!window.console){
+				console = {log:function(){},debug:function(){}};
+			}
+			//create canvas
+			var cv = document.createElement('canvas');
+			cv.width = BW;
+			cv.height = BH;
+			cv.style.background = "BLACK";
+			document.body.appendChild(cv);
+			ctx = cv.getContext("2d");
+			imageData = ctx.createImageData(BW, BH);
+			texture = initArray(TW,TH,0);
+			selectTexture("t1");
+			angleTable = initArray(BW,BH,0);
+			distanceTable = initArray(BW,BH,0);
+			
+			 for(var x = 0; x < BW; x++){
+				for(var y = 0; y < BH; y++){
+					var angle, distance;
+					var ratio = 32.0;
+					var dx = (x - BW / 2.0);
+					var dy = (y - BH / 2.0);
+					if(dx==0 && dy==0){
+						angle = distance = 0;
+					}
+					else{
+						distance = Math.floor(ratio * TH / Math.sqrt(dx * dx + dy * dy)) % TH;
+						angle = Math.atan2(dy, dx)/Math.PI;
+						if(angle<0){
+							angle = 2+angle;
+						}
+						angle = Math.floor(0.5 * TW * angle);
+					}
+					distanceTable[x][y] = distance;
+					angleTable[x][y] = angle;
+				}
+			}
+			
+			setInterval(render, 33);
+		};
+		</script>
+	</head>
+	<body onload="init()">
+		点击选择图片:<br/>
+		<img id="t1" src="res/1.png" onclick="selectTexture(this.id)"></img>
+		<img id="t2" src="res/2.png" onclick="selectTexture(this.id)"></img>
+		<img id="t3" src="res/3.png" onclick="selectTexture(this.id)"></img>
+		<br/>
+	</body>
+</html>

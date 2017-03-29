@@ -1,0 +1,54 @@
+<html>
+	<head>
+		<title>EX1</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc(){
+				var x0 = $('#_x0').val();
+				var x1 = $('#_x1').val();
+				var x2 = $('#_x2').val();
+				var y0 = $('#_y0').val();
+				var y1 = $('#_y1').val();
+				var y2 = $('#_y2').val();
+				var s = "设 y = ax<sup>2</sup>+bx+c; 得到方程组：<br/>"
+						+x0*x0+"*a+"+x0+"*b+"+"c="+y0+"<br/>"
+						+x1*x1+"*a+"+x1+"*b+"+"c="+y1+"<br/>"
+						+x2*x2+"*a+"+x2+"*b+"+"c="+y2+"<br/>";
+						
+				var A = $M([
+				  [x0*x0,x0*1,1],
+				  [x1*x1,x1*1,1],
+				  [x2*x2,x2*1,1]
+				]);
+				
+				var B =  $V([y0*1,y1*1,y2*1]);
+				
+				var X = A.inv().multiply(B);
+				
+				var a = X.e(1);
+				var b = X.e(2);
+				var c = X.e(3);
+				
+				s += "解方程组得到：a="+a+",b="+b+",c="+c+"<br/>";
+				
+				s += "f(x)的二次插值多项式为:f(x)="+a+"x<sup>2</sup>+"+b+"x+"+c;
+				
+				$('#result').html(s);
+			}
+		</script>
+	</head>
+	<body onload="calc()">
+		设当x = <input type="text" value="1" id="_x0"/>,
+		<input type="text" value="-1" id="_x1"/>,
+		<input type="text" value="2" id="_x2"/>时，f(x)=
+		<input type="text" value="0" id="_y0"/>,
+		<input type="text" value="-3" id="_y1"/>,
+		<input type="text" value="4" id="_y2"/>,求f(x)的二次插值多项式。
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<div id="result"></div>
+	</body>
+</html>

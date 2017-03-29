@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<title>二分法求根</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/sylvester.js"></script>
+		<script>
+			function calc(){
+				var x0 = $('#_X0').val()*1.0;
+				var x1 = $('#_X1').val()*1.0;
+				var e = $('#_E').val();
+				var f;
+				eval("f=function(x){return ("+$('#_F').val()+");}");
+				
+				var i = x0;
+				var j = x1;
+				var c = 1;
+				var m  = 0;
+				var s ="";
+				
+				do{
+					m = (i+j)/2;
+					var t = f(m);
+					s += "第"+(c++)+"次迭代,f("+m+")="+t+",区间为("+i+","+j+")<br/>";
+					if(t>0){
+						j = m;
+					}
+					else{
+						i = m;
+					}
+				}while(j-i>=e)
+				
+				s += "<br/>根为："+m;
+				$('#result').html(s);
+			}	
+		</script>
+	</head>
+	<body onload="calc()">
+		方程f(x)=<input type="text" id="_F" value="x*x-x-1"/>=0;<br/>
+		根区间：<input type="text" id="_X0" value="1"/>--<input type="text" id="_X1" value="2"/>
+		误差：<input type="text" id="_E" value="0.05"/>
+		<br/>
+		<input type="button" onclick="calc()" value="计算"/>
+		<br/><br/>
+		<div id="result"></div>
+	</body>
+</html>

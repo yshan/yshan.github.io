@@ -1,0 +1,289 @@
+<html>
+    <head>
+        <title>逻辑回归</title>
+        <META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+        <META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jcanvas.min.js"></script>
+        <script type="text/javascript" src="js/regression.js"></script>
+        <script>
+        (function(){
+            var BW = 600; //board width
+            var BGCOLOR = "lightgray";
+            var ORG = [20,BW-20];
+            var AW = BW - ORG[0];
+            var points = [];
+            var model;
+            var iteration = 0;
+            var stopped = false;
+            var loss = 0;
+            
+            function drawAxis(){
+                var ox = ORG[0], oy = ORG[1];
+                //draw x axis
+                $("canvas").drawLine({
+                      strokeStyle:"black" ,
+                      strokeWidth: 2,
+                      x1: 0, y1: oy,
+                      x2: BW, y2: oy
+                    });
+                $("canvas").drawLine({
+                      strokeStyle:"black" ,
+                      strokeWidth: 0,
+                      x1: BW-10, y1: oy-5,
+                      x2: BW, y2: oy,
+                      x3: BW-10, y3: oy+5
+                    });
+                $("canvas").drawText({
+                      fillStyle: "black",
+                      strokeStyle: "black",
+                      strokeWidth: 1,
+                      x: BW-5, y:oy+10,
+                      font: "8pt Arial",
+                      text: "X1"
+                    });
+                
+                    
+                //draw y axis
+                $("canvas").drawLine({
+                      strokeStyle:"black" ,
+                      strokeWidth: 0,
+                      x1: ox, y1: 0,
+                      x2: ox, y2: BW
+                    });
+                $("canvas").drawLine({
+                      strokeStyle:"black" ,
+                      strokeWidth: 0,
+                      x1: ox-5, y1: 10,
+                      x2: ox, y2: 0,
+                      x3: ox+5, y3: 10
+                    });
+                $("canvas").drawText({
+                      fillStyle: "black",
+                      strokeStyle: "black",
+                      strokeWidth: 1,
+                      x: ox-10, y:10,
+                      font: "8pt Arial",
+                      text: "X2"
+                    });
+                
+                //draw org
+                $("canvas").drawText({
+                      fillStyle: "black",
+                      strokeStyle: "black",
+                      strokeWidth: 1,
+                      x: ox-10, y:oy+10,
+                      font: "8pt Arial",
+                      text: "O"
+                    });
+            }
+            
+            function drawModel(){
+                for(var x1=0;x1<AW;++x1){
+                    for(var x2=0;x2<AW;++x2){
+                        var y = model(x1,x2);
+                        if(Math.abs(y)<0.01){
+                            var cx = x1+ORG[0];
+                            var cy = ORG[1]-x2;
+                            $("canvas").drawEllipse({
+                              fillStyle: "black",
+                              x: cx, y:cy,
+                              width: 2, height: 2
+                            });
+                        }
+                    }
+                }
+            }
+            
+            function drawPoint(x,y,val){
+                var cx = x+ORG[0];
+                var cy = ORG[1]-y;
+                if(val==0){
+                    $("canvas").drawLine({
+                          strokeStyle:"red" ,
+                          strokeWidth: 1,
+                          x1: cx-5, y1: cy-5,
+                          x2: cx+5, y2: cy+5
+                    });
+                    $("canvas").drawLine({
+                          strokeStyle:"red" ,
+                          strokeWidth: 1,
+                          x1: cx+5, y1: cy-5,
+                          x2: cx-5, y2: cy+5
+                    });
+                }
+                else{
+                    $("canvas").drawEllipse({
+                      strokeStyle: "blue",
+                      strokeWidth: 1,
+                      x: cx, y:cy,
+                      width: 10, height: 10
+                    });
+                }
+            }
+            
+            function render(){
+                $("canvas").drawRect({
+                  fillStyle: BGCOLOR,
+                  x: 0, y: 0,
+                  width: BW,
+                  height: BW,
+                  fromCenter: false
+                });
+                
+                drawAxis();
+                
+                for(var i=0;i<points.length;++i){
+                    var p = points[i];
+                    drawPoint(p[0],p[1],p[2]);
+                }
+                
+                if(model){
+                    drawModel();
+                }
+                
+                if(loss!=0){
+                    $("canvas").drawText({
+                      fillStyle: "red",
+                      strokeStyle: "red",
+                      fromCenter: false,
+                      strokeWidth: 1,
+                      x: BW-200, y:5,
+                      font: "10pt Arial",
+                      text: "Loss:"+loss
+                    });
+                }
+            }
+            
+            function reset(){
+                points = [];
+                loss = 0;
+                model = null;
+                render();
+            }
+            
+            function training(){
+                if(points.length<2){
+                    return;
+                }
+                iteration = 0;
+                var m = parseInt($("#modelTxt").val());
+                var regular = $('#regularSel').is(':checked');
+                var learnRate = parseFloat($("#learnRateTxt").val());
+                var reg = new GDRegression(points,m,regular,learnRate);
+                var MAX_ITER = parseInt($("#iterCountTxt").val());
+                var MIN_LOSS = 1e-5
+                stopped = false;
+                var lastloss = 0;
+                loss = 0;
+                var failed = false;
+                triggerEvent(false);
+                var t = function(){
+                    while(iteration++<MAX_ITER && !stopped){
+                        loss = reg.training();
+                        /*if(Math.abs(loss-lastloss)<MIN_LOSS){
+                            break;
+                        }*/
+                        if(lastloss!=0 && loss>=lastloss+10){
+                            failed = true;
+                            break;
+                        }
+                        lastloss = loss;
+                        if(iteration%100==0){
+                            console.log("theta:"+reg.getTheta()+",loss:"+loss);
+                            model = reg.getModel();
+                            render();
+                            setTimeout(t,0);
+                            return;
+                        }
+                    }
+                    if(!failed){
+                        console.log("final theta:"+reg.getTheta()+",loss:"+loss);
+                        model = reg.getModel();
+                        render();
+                        window.alert("训练完成");
+                    }
+                    else{
+                        window.alert("训练失败");
+                    }
+                    triggerEvent(true);
+                };
+                t();
+            }
+            
+            function triggerEvent(enabled){
+                $("canvas").unbind();
+                $("#clearBtn").unbind();
+                $("#trainingBtn").unbind();
+                $("#stopBtn").unbind();
+                
+                if(enabled){
+                    $("canvas").bind("contextmenu",function(e){
+                        return false;
+                    });
+                    $("canvas").mousedown(function(event) {
+                        var position = $("canvas").position();
+                        var cx = event.pageX - position.left;
+                        var cy = event.pageY - position.top;
+                        var x = cx - ORG[0];
+                        var y = ORG[1] - cy;
+                        
+                        if(x>0 && y>0){
+                            if(event.which==1){
+                                points.push([x,y,0]);
+                                drawPoint(x,y,0);
+                            }
+                            else if(event.which==3){
+                                points.push([x,y,1]);
+                                drawPoint(x,y,1);
+                            }
+                        }
+                    });
+                    $("#clearBtn").removeAttr('disabled');
+                    $("#clearBtn").click(reset);
+                    $("#trainingBtn").removeAttr('disabled');
+                    $("#trainingBtn").click(training);
+                    $("#stopBtn").attr('disabled','disabled');
+                }
+                else{
+                    $("#clearBtn").attr('disabled','disabled');
+                    $("#trainingBtn").attr('disabled','disabled');
+                    $("#stopBtn").removeAttr('disabled');
+                    $("#stopBtn").click(function(){
+                        stopped = true;
+                    });
+                }
+            }
+            
+            $(function(){
+                if (!window.console){
+                    console = {log:function(){},debug:function(){}};
+                }
+                //create canvas
+                var cv = document.createElement('canvas');
+                cv.width = BW;
+                cv.height = BW;
+                cv.style.background = BGCOLOR;
+                $('#opera').after(cv);
+                reset();
+                triggerEvent(true);
+            });
+        })();    
+        </script>
+    </head>
+    <body>
+        <div id="opera">
+        Degree: <input type="text" id="modelTxt" size="1" value="1"/> <br/>
+        Learn Rate: <input type="text" id="learnRateTxt" size="5" value="0.1"/> <br/>
+        Iteration Count: <input type="text" id="iterCountTxt" size="6" value="50000"/> <br/>
+        <input type="checkbox" id="regularSel"/> Regularization <br/>
+        <input type="button" value="清除" id="clearBtn"/>
+        <input type="button" value="训练" id="trainingBtn"/>
+        <input type="button" value="停止训练" id="stopBtn"/>
+        &nbsp;&nbsp;&nbsp;Author:<a href="http://weibo.com/yssss1980">@殷山</a>
+        </div>
+        <div id="desc" style="font:8pt;color:green;">
+        操作说明:使用左键和右键绘制不同的点
+        </div>
+    </body>
+</html>

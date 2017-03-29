@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>异常检测</title>
+		<META http-equiv="X-UA-Compatible" content="IE=edge"></META>
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+		<script type="text/javascript" src="js/random.js"></script>
+		<script>
+			var samples = [];
+			var mean;
+			var stdvar;
+			var SIZE = 100;
+			var graph;
+			var rnd = new Random(1234);
+			var badSamples = [];
+			var EPSON = 5e-5;
+			
+			function init(){
+				randomGenData();
+				graph = $.plot("#wscanvas",rebuildDate(),{yaxis: {min: 0,	max: 100},	xaxis: {min: 0,	max: 100}});
+			}
+			
+			function rebuildDate(){
+				return [{data:samples,points: { show: true },label: "正常样本",color:"green"}
+									,{data: badSamples,points: { show: true,radius:5 },label: "异常样本",color:"red"}
+									];
+			}
+			
+			function redraw(){
+				graph.setData(rebuildDate());
+				graph.draw();
+			}
+			
+			function calcProb(x){
+				return 1.0/(stdvar*Math.sqrt(2*Math.PI))*Math.exp(-0.5*(x-mean)*(x-mean)/(stdvar*stdvar));
+			}
+			
+			function detect(){
+				badSamples = [];
+				
+				for(var i=0;i<samples.length;++i){
+					var x1 = samples[i][0];
+					var x2 = samples[i][1];
+					var p1 = calcProb(x1);
+					var p2 = calcProb(x2);
+					var p = p1*p2;
+					if(p<EPSON){
+						badSamples.push([x1,x2]);
+					}
+				}
+			}
+			
+			function randomGenData(){
+				mean = Math.random()*20+SIZE/2-10;
+				stdvar = Math.random()*10+10;
+				samples = [];
+				badSamples = [];
+				
+				for(var i=0;i<100;++i){
+					var x1 = rnd.normal(mean, stdvar) ;
+					var x2 = rnd.normal(mean, stdvar) ;
+					samples.push([x1,x2]);
+				}
+			}
+			
+			
+		</script>
+	</head>
+	<body onload="init()">
+		<input type="button" id="btnRandomGen" value="随机生成数据" onclick="randomGenData();redraw()"/>
+		<input type="button" id="btnDetect" value="异常检测" onclick="detect();redraw()"/> &nbsp;&nbsp;&nbsp;Created by 殷山
+		<div id="wscanvas" style="height:600px;width:600px"></div>
+	</body>
+</html>
