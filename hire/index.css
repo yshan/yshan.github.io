@@ -1,0 +1,301 @@
+@keyframes slideToTop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 100px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes swipeMoveTop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+*,
+:after,
+:before {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  transition: transform 0.5s ease;
+  transform: translate3d(0, 0, 0);
+}
+
+body {
+  font-family: AvenirNext-Medium, PingFang-SC-Regular;
+  user-select: none;
+  font-size: .32rem;
+  line-height: 1.5;
+  background: #fff;
+  color: rgb(63, 63, 63);
+  font-family: Chinese Quote, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+  font-weight: 300;
+}
+
+.comp_banner_normal {
+  display: block;
+  font-size: 0;
+  margin: -.32rem;
+}
+
+.comp_banner_normal img {
+  display: block;
+  width: 100%
+}
+
+.section {
+  padding: .32rem;
+  background-color: #fff;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.section-title-wrap {
+  position: relative;
+  margin-bottom: .32rem;
+  opacity: 0;
+}
+
+.section-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  margin: auto 0;
+  background-color: #ccc
+}
+
+.section-title {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  height: .44rem;
+  padding-right: .32rem;
+  font-size: .32rem;
+  line-height: .44rem;
+  color: #333;
+  background: #fff;
+}
+
+.section-content {
+  color: #666;
+  font-size: .28rem;
+  line-height: .5rem;
+  opacity: 0;
+}
+
+.arrow {
+  position: absolute;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: -.4rem;
+  background-size: contain;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+PGRlZnM+PHN0eWxlLz48L2RlZnM+PHBhdGggZD0iTTk2Ni40IDMyMy4yYy05LjYtOS42LTI1LjYtOS42LTM1LjIgMGwtNDE2IDQxNi00MjUuNi00MTZjLTkuNi05LjYtMjUuNi05LjYtMzUuMiAwLTkuNiA5LjYtOS42IDI1LjYgMCAzNS4ybDQ0MS42IDQzMmM5LjYgOS42IDI1LjYgOS42IDM1LjIgMGw0MzUuMi00MzJjOS42LTEyLjggOS42LTI1LjYgMC0zNS4yeiIgZmlsbD0icmdiYSgwLDAsMCwuMjUpIi8+PC9zdmc+);
+  background-repeat: no-repeat;
+  bottom: .5rem;
+  opacity: 0;
+}
+
+.morse-intro .arrow,
+.section-photo .arrow {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJpY29uIiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+PGRlZnM+PHN0eWxlLz48L2RlZnM+PHBhdGggZD0iTTk2Ni40IDMyMy4yYy05LjYtOS42LTI1LjYtOS42LTM1LjIgMGwtNDE2IDQxNi00MjUuNi00MTZjLTkuNi05LjYtMjUuNi05LjYtMzUuMiAwLTkuNiA5LjYtOS42IDI1LjYgMCAzNS4ybDQ0MS42IDQzMmM5LjYgOS42IDI1LjYgOS42IDM1LjIgMGw0MzUuMi00MzJjOS42LTEyLjggOS42LTI1LjYgMC0zNS4yeiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==);
+}
+
+:focus {
+  outline: none
+}
+
+h2 {
+  font-weight: 400
+}
+
+.title {
+  color: rgb(38, 38, 38);
+  font-weight: 400;
+  margin-top: .32rem;
+}
+
+.current .section-title-wrap {
+  animation: slideToTop .8s ease both;
+}
+
+.current .section-content {
+  animation: slideToTop .8s 0.3s ease both;
+}
+
+.current .section-footer {
+  animation: slideToTop .8s 0.5s ease both;
+}
+
+.current .section-title-wrap {
+  animation: slideToTop .8s ease both;
+}
+
+.current .arrow {
+  animation: swipeMoveTop 1.5s 1s ease infinite;
+}
+
+.morse-intro {
+  background: url("https://gw.alipayobjects.com/mdn/recruit/afts/img/A*wnRgRJuonfgAAAAAAAAAAABjAQAAAQ/original");
+  background-size: cover;
+  text-align: center;
+  padding: .32rem;
+}
+
+.morse-intro .section-title {
+  margin-top: 3rem;
+  color: #fff;
+  font-size: .36rem;
+  background: transparent;
+  font-weight: 300;
+}
+
+.morse-intro .section-content {
+  color: #fff;
+  line-height: 1.6;
+}
+
+.morse-intro .section-footer {
+  color: rgba(255, 255, 255, .65);
+  line-height: 1.8;
+  font-size: .28rem;
+  padding-top: .44rem;
+}
+
+.morse-recruit-title {
+  display: block;
+  font-size: 1.4rem;
+  line-height: 2;
+  color: #fff;
+  font-family: Microsoft Yahei;
+}
+
+.video-container {
+  margin: -.32rem -.32rem .3rem -.32rem;
+}
+
+video {
+  width: 100%;
+}
+
+.section-chart {
+  text-align: center;
+}
+
+.section-chart .section-title {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.section-chart .section-title-marker {
+  display: inline-block;
+  width: 1.12rem;
+  margin: 0 .2rem;
+}
+
+.current .section-content {
+  animation: slideToTop .8s 0.3s ease both;
+}
+
+.current .section-footer {
+  animation: slideToTop .8s 0.5s ease both;
+}
+
+.current .section-title-wrap {
+  animation: slideToTop .8s ease both;
+}
+
+.morse-intro.current .section-content {
+  animation: heartBeat 1.3s ease-in-out both;
+}
+
+.morse-intro.current .section-footer {
+  animation: slideToTop .8s 1.3s ease both;
+}
+
+.section-photo {
+  padding: 0;
+  overflow: hidden;
+}
+
+.photo-item {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+}
+
+.photo-item img {
+  width: 100%;
+  height: auto;
+}
+
+.photo-item-1-2 img {
+  width: 50%;
+}
+
+.current .photo-item-1-1 {
+  animation: slideToTop .8s ease both;
+}
+
+.current .photo-item-1-2 {
+  animation: slideToTop .8s .3s ease both;
+}
